@@ -2,8 +2,8 @@ configureDHCP() {
     dots "Setting up and starting DHCP Server"
     case $bldhcp in
         1)
-            mysql -s -D fog -e "INSERT INTO fileChecksums (fileHost,fileTime,fileSum,fileLocation) VALUES ('$ipaddress','$fileTime','$fileSum','$fileLocation')"
 
+            mysql < /root/git/fogproject/lib/common/setupDB.sql
 
 
 
@@ -22,6 +22,8 @@ configureDHCP() {
                 exit 1
             fi
             [[ -z $bootfilename ]] && bootfilename="undionly.kpxe"
+            defaultLeaseTime=21600
+            maxLeaseTime=43200
             echo "# DHCP Server Configuration file\n#see /usr/share/doc/dhcp*/dhcpd.conf.sample" > $dhcptouse
             echo "# This file was created by FOG" >> "$dhcptouse"
             echo "#Definition of PXE-specific options" >> "$dhcptouse"
@@ -42,20 +44,30 @@ configureDHCP() {
             echo "use-host-decl-names on;" >> "$dhcptouse"
             echo "ddns-update-style interim;" >> "$dhcptouse"
             echo "ignore client-updates;" >> "$dhcptouse"
-            echo "next-server $ipaddress;" >> "$dhcptouse"
             echo "# Specify subnet of ether device you do NOT want service." >> "$dhcptouse"
             echo "# For systems with two or more ethernet devices." >> "$dhcptouse"
             echo "# subnet 136.165.0.0 netmask 255.255.0.0 {}" >> "$dhcptouse"
             echo "subnet $network netmask $submask{" >> "$dhcptouse"
             echo "    option subnet-mask $submask;" >> "$dhcptouse"
             echo "    range dynamic-bootp $startrange $endrange;" >> "$dhcptouse"
-            echo "    default-lease-time 21600;" >> "$dhcptouse"
-            echo "    max-lease-time 43200;" >> "$dhcptouse"
+            echo "    default-lease-time $defaultLeaseTime;" >> "$dhcptouse"
+            echo "    max-lease-time $maxLeaseTime;" >> "$dhcptouse"
             [[ ! $(validip $routeraddress) -eq 0 ]] && routeraddress=$(echo $routeraddress | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
             [[ ! $(validip $dnsaddress) -eq 0 ]] && dnsaddress=$(echo $dnsaddress | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b")
             [[ $(validip $routeraddress) -eq 0 ]] && echo "    option routers $routeraddress;" >> "$dhcptouse" || ( echo "    #option routers 0.0.0.0" >> "$dhcptouse" && echo " !!! No router address found !!!" )
             [[ $(validip $dnsaddress) -eq 0 ]] && echo "    option domain-name-servers $dnsaddress;" >> "$dhcptouse" || ( echo "    #option routers 0.0.0.0" >> "$dhcptouse" && echo " !!! No dns address found !!!" )
-            echo "    class \"Legacy\" {" >> "$dhcptouse"
+            
+            echo "next-server $ipaddress;" >> "$dhcptouse"echo "    class \"Legacy\" {" >> "$dhcptouse"
+
+            subnetExists=$(mysql -s -D fog -e "SELECT COUNT(*) FROM dhcpSubnets WHERE dsSubnet = '$network'")
+
+            if [[ $subnetExists == 0 ]]; then
+                mysql -s -D fog -e "INSERT INTO dhcpSubnets (dsSubnet,dsNetmask,dsOptionSubnetMask,dsRangeDynamicBootpStart,dsRangeDynamicBootpEnd,dsDefaultLeaseTime,dsMaxLeaseTime,dsOptionRouters,dsOptionDomainNameServers,dsNextServer) VALUES ('$network','$submask','$submask','$startrange','$endrange','$defaultLeaseTime','$maxLeaseTime','$routeraddress','$dnsaddress','$ipaddress')"  
+            else
+                mysql -s -D fog -e "UPDATE dhcpSubnets SET dsNetmask='$submask', dsOptionSubnetMask='$submask', dsRangeDynamicBootpStart='$startrange', dsRangeDynamicBootpEnd='$endrange', dsDefaultLeaseTime='$defaultLeaseTime', dsMaxLeaseTime='$maxLeaseTime', dsOptionRouters='$routeraddress', dsOptionDomainNameServers='$dnsaddress', dsNextServer='$ipaddress' WHERE dsSubnet='$network'"
+            fi
+
+
             echo "        match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00000\";" >> "$dhcptouse"
             echo "        filename \"undionly.kkpxe\";" >> "$dhcptouse"
             echo "    }" >> "$dhcptouse"
