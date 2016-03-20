@@ -2,6 +2,11 @@ configureDHCP() {
     dots "Setting up and starting DHCP Server"
     case $bldhcp in
         1)
+            mysql -s -D fog -e "INSERT INTO fileChecksums (fileHost,fileTime,fileSum,fileLocation) VALUES ('$ipaddress','$fileTime','$fileSum','$fileLocation')"
+
+
+
+
             [[ -f $dhcpconfig ]] && cp -f $dhcpconfig ${dhcpconfig}.fogbackup
             serverip=$(ip -4 -o addr show $interface | awk -F'([ /])+' '/global/ {print $4}')
             [[ -z $serverip ]] && serverip=$(/sbin/ifconfig $interface | grep -oE 'inet[:]? addr[:]?([0-9]{1,3}\.){3}[0-9]{1,3}' | awk -F'(inet[:]? ?addr[:]?)' '{print $2}')
