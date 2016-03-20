@@ -57,17 +57,41 @@ configureDHCP() {
             [[ $(validip $routeraddress) -eq 0 ]] && echo "    option routers $routeraddress;" >> "$dhcptouse" || ( echo "    #option routers 0.0.0.0" >> "$dhcptouse" && echo " !!! No router address found !!!" )
             [[ $(validip $dnsaddress) -eq 0 ]] && echo "    option domain-name-servers $dnsaddress;" >> "$dhcptouse" || ( echo "    #option routers 0.0.0.0" >> "$dhcptouse" && echo " !!! No dns address found !!!" )
             
-            echo "next-server $ipaddress;" >> "$dhcptouse"echo "    class \"Legacy\" {" >> "$dhcptouse"
+            echo "next-server $ipaddress;" >> "$dhcptouse"
 
             subnetExists=$(mysql -s -D fog -e "SELECT COUNT(*) FROM dhcpSubnets WHERE dsSubnet = '$network'")
 
             if [[ $subnetExists == 0 ]]; then
                 mysql -s -D fog -e "INSERT INTO dhcpSubnets (dsSubnet,dsNetmask,dsOptionSubnetMask,dsRangeDynamicBootpStart,dsRangeDynamicBootpEnd,dsDefaultLeaseTime,dsMaxLeaseTime,dsOptionRouters,dsOptionDomainNameServers,dsNextServer) VALUES ('$network','$submask','$submask','$startrange','$endrange','$defaultLeaseTime','$maxLeaseTime','$routeraddress','$dnsaddress','$ipaddress')"  
+		dsID=$(mysql -s -D fog -e "SELECT dsID FROM dhcpSubnets WHERE dsSubnet = '$network'")
+                dcClass="Legacy"
+                dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00000\"\;"
+                dcMatchOption="filename \"undionly.kkpxe\"\;"
+		mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                dcClass="UEFI-32-2"
+                dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00002\"\;"
+                dcMatchOption="filename \"i386-efi/ipxe.efi\"\;"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                dcClass="UEFI-32-1"
+                dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00006\"\;"
+                dcMatchOption="filename \"i386-efi/ipxe.efi\"\;"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                dcClass="UEFI-64-1"
+                dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00007\"\;"
+                dcMatchOption="filename \"ipxe.efi\"\;"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                dcClass="UEFI-64-2"
+                dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00008\"\;"
+                dcMatchOption="filename \"ipxe.efi\"\;"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                dcClass="UEFI-64-3"
+                dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00009\"\;"
+                dcMatchOption="filename \"ipxe.efi\"\;"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
             else
                 mysql -s -D fog -e "UPDATE dhcpSubnets SET dsNetmask='$submask', dsOptionSubnetMask='$submask', dsRangeDynamicBootpStart='$startrange', dsRangeDynamicBootpEnd='$endrange', dsDefaultLeaseTime='$defaultLeaseTime', dsMaxLeaseTime='$maxLeaseTime', dsOptionRouters='$routeraddress', dsOptionDomainNameServers='$dnsaddress', dsNextServer='$ipaddress' WHERE dsSubnet='$network'"
             fi
-
-
+            echo "    class \"Legacy\" {" >> "$dhcptouse"
             echo "        match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00000\";" >> "$dhcptouse"
             echo "        filename \"undionly.kkpxe\";" >> "$dhcptouse"
             echo "    }" >> "$dhcptouse"
