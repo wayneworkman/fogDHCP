@@ -14,6 +14,7 @@ dsOptionNtpServers VARCHAR(255),
 dsNextServer VARCHAR(50),
 dsCustomArea1 VARCHAR(255),
 dsCustomArea2 VARCHAR(255),
+dsCustomArea3 VARCHAR(255),
 PRIMARY KEY (dsID)
 );
 CREATE TABLE IF NOT EXISTS dhcpClasses(
