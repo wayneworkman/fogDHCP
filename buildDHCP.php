@@ -95,7 +95,7 @@ $New_Line="\n";
 			if ($dsOptionSubnetMask != "") {
 				$New_File = $New_File . "    option subnet-mask " . $dsOptionSubnetMask . ";" . $New_Line;
 			}
-			if ($dsRangeDynamicBootpStart != "" && dsRangeDynamicBootpEnd != "") {
+			if ($dsRangeDynamicBootpStart != "" && $dsRangeDynamicBootpEnd != "") {
 				$New_File = $New_File . "    range dynamic-bootp " . $dsRangeDynamicBootpStart . " " . $dsRangeDynamicBootpEnd . ";" . $New_Line;
 			}
 			if ($dsDefaultLeaseTime != "") {
@@ -173,7 +173,7 @@ $New_Line="\n";
 			$New_File = $New_File . "host " . $drName . " {" . $New_Line;
 			$New_File = $New_File . "    hardware ethernet " . $drMAC . ";" . $New_Line;
 			
-			if ($drFileName != "") {
+			if ($drFilename != "") {
 				$New_File = $New_File . "    filename \"" . $drFilename . "\";" . $New_Line;
 			}
 			if ($drIP != "") {
