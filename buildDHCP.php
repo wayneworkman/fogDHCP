@@ -13,7 +13,7 @@ $New_Line="\n";
 
 
 //start loop.
-//while(1) {
+while(1) {
 	
 	// Sleep.
 	sleep($DHCP_Service_Sleep_Time);
@@ -200,19 +200,27 @@ $New_Line="\n";
 
 
 	// Write commands for this user, for this setting, to the setting's file.
-	$file = $DHCP_To_Use . ".new";
+	$file = $DHCP_To_Use . ".fog";
 	if (file_exists($file)) {
 		unlink($file);
 	}
 	file_put_contents($file, $New_File);
 	
 	//Check MD5 Sum.
+	$Current_DHCP_Checksum = sha1_file($DHCP_To_Use);
+	$New_DHCP_Checksum = sha1_file($file);
+
+
+	if ($Current_DHCP_Checksum != $New_DHCP_Checksum) {
+		// Move file and restart service.
+		unlink($DHCP_To_Use);
+		rename($file, $DHCP_To_Use);
+		
+	}
 
 
 
 
-
-
-//end loop.
-//}
+//end of loop.
+}
 ?>
