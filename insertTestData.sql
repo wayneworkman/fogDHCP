@@ -1,4 +1,4 @@
-USE FOG;
+USE fog;
 TRUNCATE TABLE dhcpReservations;
 
 INSERT INTO dhcpReservations (drMAC,drName,drIP,drCustomArea1) VALUES ('00:13:72:AB:FD:7C','data','10.0.0.2','#This is the video server.');
