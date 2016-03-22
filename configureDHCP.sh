@@ -24,29 +24,76 @@ configureDHCP() {
             [[ -z $bootfilename ]] && bootfilename="undionly.kpxe"
             defaultLeaseTime=21600
             maxLeaseTime=43200
-            echo "# DHCP Server Configuration file\n#see /usr/share/doc/dhcp*/dhcpd.conf.sample" > $dhcptouse
-            echo "# This file was created by FOG" >> "$dhcptouse"
-            echo "#Definition of PXE-specific options" >> "$dhcptouse"
-            echo "# Code 1: Multicast IP Address of bootfile" >> "$dhcptouse"
-            echo "# Code 2: UDP Port that client should monitor for MTFTP Responses" >> "$dhcptouse"
-            echo "# Code 3: UDP Port that MTFTP servers are using to listen for MTFTP requests" >> "$dhcptouse"
-            echo "# Code 4: Number of seconds a client must listen for activity before trying" >> "$dhcptouse"
-            echo "#         to start a new MTFTP transfer" >> "$dhcptouse"
-            echo "# Code 5: Number of seconds a client must listen before trying to restart" >> "$dhcptouse"
-            echo "#         a MTFTP transfer" >> "$dhcptouse"
-            echo "option space PXE;" >> "$dhcptouse"
-            echo "option PXE.mtftp-ip code 1 = ip-address;" >> "$dhcptouse"
-            echo "option PXE.mtftp-cport code 2 = unsigned integer 16;" >> "$dhcptouse"
-            echo "option PXE.mtftp-sport code 3 = unsigned integer 16;" >> "$dhcptouse"
-            echo "option PXE.mtftp-tmout code 4 = unsigned integer 8;" >> "$dhcptouse"
-            echo "option PXE.mtftp-delay code 5 = unsigned integer 8;" >> "$dhcptouse"
-            echo "option arch code 93 = unsigned integer 16;" >> "$dhcptouse"
-            echo "use-host-decl-names on;" >> "$dhcptouse"
-            echo "ddns-update-style interim;" >> "$dhcptouse"
-            echo "ignore client-updates;" >> "$dhcptouse"
-            echo "# Specify subnet of ether device you do NOT want service." >> "$dhcptouse"
-            echo "# For systems with two or more ethernet devices." >> "$dhcptouse"
-            echo "# subnet 136.165.0.0 netmask 255.255.0.0 {}" >> "$dhcptouse"
+  
+
+            mysql -s -D fog -e "TRUNCATE TABLE dhcpGlobals"
+
+
+            dgOption="# DHCP Server Configuration file"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="#see /usr/share/doc/dhcp*/dhcpd.conf.sample"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="# This file was created by FOG"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="#Definition of PXE-specific options"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="# Code 1: Multicast IP Address of bootfile"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="# Code 2: UDP Port that client should monitor for MTFTP Responses"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="# Code 3: UDP Port that MTFTP servers are using to listen for MTFTP requests"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="# Code 4: Number of seconds a client must listen for activity before trying"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="#         to start a new MTFTP transfer"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="# Code 5: Number of seconds a client must listen before trying to restart"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="#         a MTFTP transfer"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="option space PXE;"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo $dgOption > $dhcptouse
+            dgOption="option PXE.mtftp-ip code 1 = ip-address\;"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo "option PXE.mtftp-ip code 1 = ip-address;" > $dhcptouse
+            dgOption="option PXE.mtftp-cport code 2 = unsigned integer 16\;"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo "option PXE.mtftp-cport code 2 = unsigned integer 16;" > $dhcptouse
+            dgOption="option PXE.mtftp-sport code 3 = unsigned integer 16\;"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo "option PXE.mtftp-sport code 3 = unsigned integer 16;" > $dhcptouse
+            dgOption="option PXE.mtftp-tmout code 4 = unsigned integer 8\;"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo "option PXE.mtftp-tmout code 4 = unsigned integer 8;" > $dhcptouse
+            dgOption="option PXE.mtftp-delay code 5 = unsigned integer 8\;"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo "option PXE.mtftp-delay code 5 = unsigned integer 8;" > $dhcptouse
+            dgOption="option arch code 93 = unsigned integer 16\;"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo "option arch code 93 = unsigned integer 16;" > $dhcptouse
+            dgOption="use-host-decl-names on\;"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo "use-host-decl-names on;" > $dhcptouse
+            dgOption="ddns-update-style interim\;"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo "ddns-update-style interim;" > $dhcptouse
+            dgOption="ignore client-updates\;"
+            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            echo "ignore client-updates;" > $dhcptouse
+            
+
             echo "subnet $network netmask $submask{" >> "$dhcptouse"
             echo "    option subnet-mask $submask;" >> "$dhcptouse"
             echo "    range dynamic-bootp $startrange $endrange;" >> "$dhcptouse"
@@ -57,37 +104,38 @@ configureDHCP() {
             [[ $(validip $routeraddress) -eq 0 ]] && echo "    option routers $routeraddress;" >> "$dhcptouse" || ( echo "    #option routers 0.0.0.0" >> "$dhcptouse" && echo " !!! No router address found !!!" )
             [[ $(validip $dnsaddress) -eq 0 ]] && echo "    option domain-name-servers $dnsaddress;" >> "$dhcptouse" || ( echo "    #option routers 0.0.0.0" >> "$dhcptouse" && echo " !!! No dns address found !!!" )
             
-            echo "next-server $ipaddress;" >> "$dhcptouse"
+            echo "    next-server $ipaddress;" >> "$dhcptouse"
 
             subnetExists=$(mysql -s -D fog -e "SELECT COUNT(*) FROM dhcpSubnets WHERE dsSubnet = '$network'")
 
             if [[ $subnetExists == 0 ]]; then
                 mysql -s -D fog -e "INSERT INTO dhcpSubnets (dsSubnet,dsNetmask,dsOptionSubnetMask,dsRangeDynamicBootpStart,dsRangeDynamicBootpEnd,dsDefaultLeaseTime,dsMaxLeaseTime,dsOptionRouters,dsOptionDomainNameServers,dsNextServer) VALUES ('$network','$submask','$submask','$startrange','$endrange','$defaultLeaseTime','$maxLeaseTime','$routeraddress','$dnsaddress','$ipaddress')"  
+
 		dsID=$(mysql -s -D fog -e "SELECT dsID FROM dhcpSubnets WHERE dsSubnet = '$network'")
                 dcClass="Legacy"
                 dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00000\"\;"
                 dcMatchOption="filename \"undionly.kkpxe\"\;"
-		mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+		mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption1) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
                 dcClass="UEFI-32-2"
                 dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00002\"\;"
                 dcMatchOption="filename \"i386-efi/ipxe.efi\"\;"
-                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption1) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
                 dcClass="UEFI-32-1"
                 dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00006\"\;"
                 dcMatchOption="filename \"i386-efi/ipxe.efi\"\;"
-                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption1) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
                 dcClass="UEFI-64-1"
                 dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00007\"\;"
                 dcMatchOption="filename \"ipxe.efi\"\;"
-                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption1) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
                 dcClass="UEFI-64-2"
                 dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00008\"\;"
                 dcMatchOption="filename \"ipxe.efi\"\;"
-                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption1) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
                 dcClass="UEFI-64-3"
                 dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00009\"\;"
                 dcMatchOption="filename \"ipxe.efi\"\;"
-                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption1) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
             else
                 mysql -s -D fog -e "UPDATE dhcpSubnets SET dsNetmask='$submask', dsOptionSubnetMask='$submask', dsRangeDynamicBootpStart='$startrange', dsRangeDynamicBootpEnd='$endrange', dsDefaultLeaseTime='$defaultLeaseTime', dsMaxLeaseTime='$maxLeaseTime', dsOptionRouters='$routeraddress', dsOptionDomainNameServers='$dnsaddress', dsNextServer='$ipaddress' WHERE dsSubnet='$network'"
             fi
