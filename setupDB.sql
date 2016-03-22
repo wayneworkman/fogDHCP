@@ -1,9 +1,4 @@
 USE fog;
-drop table dhcpGlobals;
-drop table dhcpSubnets;
-drop table dhcpClasses;
-drop table dhcpFilenames;
-drop table dhcpReservations;
 CREATE TABLE IF NOT EXISTS dhcpGlobals(
 dgID int NOT NULL AUTO_INCREMENT,
 dgOption VARCHAR(255),

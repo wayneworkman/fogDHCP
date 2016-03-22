@@ -1,7 +1,7 @@
 <?php
 
-$servername="";
-$username="";
+$servername="127.0.0.1";
+$username="root";
 $password="";
 $database="fog";
 $DHCP_Service_Sleep_Time=0;
@@ -13,7 +13,7 @@ $New_Line="\n";
 
 
 //start loop.
-while(1) {
+//while(1) {
 	
 	// Sleep.
 	sleep($DHCP_Service_Sleep_Time);
@@ -93,37 +93,37 @@ while(1) {
 			$New_File = $New_File . "subnet " . $dsSubnet . " netmask " . $dsNetmask . "{" . $New_Line;
 
 			if ($dsOptionSubnetMask != "") {
-				$New_File = $New_File . "option subnet-mask " . $dsOptionSubnetMask . ";" . $New_Line;
+				$New_File = $New_File . "    option subnet-mask " . $dsOptionSubnetMask . ";" . $New_Line;
 			}
 			if ($dsRangeDynamicBootpStart != "" && dsRangeDynamicBootpEnd != "") {
-				$New_File = $New_File . "range dynamic-bootp " . $dsRangeDynamicBootpStart . " " . $dsRangeDynamicBootpEnd ";" . $New_Line;
+				$New_File = $New_File . "    range dynamic-bootp " . $dsRangeDynamicBootpStart . " " . $dsRangeDynamicBootpEnd . ";" . $New_Line;
 			}
 			if ($dsDefaultLeaseTime != "") {
-				$New_File = $New_File . "default-lease-time " . $dsDefaultLeaseTime . ";" . $New_Line;
+				$New_File = $New_File . "    default-lease-time " . $dsDefaultLeaseTime . ";" . $New_Line;
                         }
 			if ($dsMaxLeaseTime != "") {
-				$New_File = $New_File . "max-lease-time " . $dsMaxLeaseTime . ";" . $New_Line;
+				$New_File = $New_File . "    max-lease-time " . $dsMaxLeaseTime . ";" . $New_Line;
                         }
 			if ($dsOptionRouters != "") {
-				$New_File = $New_File . "option routers " . $dsOptionRouters . ";" . $New_Line;
+				$New_File = $New_File . "    option routers " . $dsOptionRouters . ";" . $New_Line;
                         }
 			if ($dsOptionDomainNameServers != "") {
-				$New_File = $New_File . "option domain-name-servers " . $dsOptionDomainNameServers . ";" . $New_Line;
+				$New_File = $New_File . "    option domain-name-servers " . $dsOptionDomainNameServers . ";" . $New_Line;
                         }
 			if ($dsOptionNtpServers != "") {
-				$New_File = $New_File . "option ntp-servers " . $dsOptionNtpServers . ";" . $New_Line;
+				$New_File = $New_File . "    option ntp-servers " . $dsOptionNtpServers . ";" . $New_Line;
                         }
 			if ($dsNextServer != "") {
-				$New_File = $New_File . "next-server " . $dsNextServer . ";" . $New_Line;
+				$New_File = $New_File . "    next-server " . $dsNextServer . ";" . $New_Line;
                         }
 			if ($dsCustomArea1 != "") {
-				$New_File = $New_File . $dsCustomArea1 . $New_Line;
+				$New_File = $New_File . "    " . $dsCustomArea1 . $New_Line;
                         }
 			if ($dsCustomArea2 != "") {
-				$New_File = $New_File . $dsCustomArea2 . $New_Line;
+				$New_File = $New_File . "    " . $dsCustomArea2 . $New_Line;
                         }
 			if ($dsRangeDynamicBootpStart != "") {
-				$New_File = $New_File . $dsCustomArea3 . $New_Line;
+				$New_File = $New_File . "    " . $dsCustomArea3 . $New_Line;
                         }
 
 			//Build classes for this subnet.	
@@ -191,6 +191,7 @@ while(1) {
 			if ($drCustomArea3 != "") {
                                 $New_File = $New_File . "    " . $drCustomArea3 . $New_Line;
                         }
+			$New_File = $New_File . "}" . $New_Line;
 		}
 	}
 
@@ -204,9 +205,7 @@ while(1) {
 		unlink($file);
 	}
 	file_put_contents($file, $New_File);
-
-
-
+	
 	//Check MD5 Sum.
 
 
@@ -215,5 +214,5 @@ while(1) {
 
 
 //end loop.
-}
+//}
 ?>
