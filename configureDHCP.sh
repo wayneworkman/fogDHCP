@@ -2,11 +2,6 @@ configureDHCP() {
     dots "Setting up and starting DHCP Server"
     case $bldhcp in
         1)
-
-            mysql < /root/git/fogproject/lib/common/setupDB.sql
-
-
-
             [[ -f $dhcpconfig ]] && cp -f $dhcpconfig ${dhcpconfig}.fogbackup
             serverip=$(ip -4 -o addr show $interface | awk -F'([ /])+' '/global/ {print $4}')
             [[ -z $serverip ]] && serverip=$(/sbin/ifconfig $interface | grep -oE 'inet[:]? addr[:]?([0-9]{1,3}\.){3}[0-9]{1,3}' | awk -F'(inet[:]? ?addr[:]?)' '{print $2}')
@@ -25,6 +20,14 @@ configureDHCP() {
             defaultLeaseTime=21600
             maxLeaseTime=43200
   
+
+
+            mysql < /root/git/fogproject/lib/common/setupDB.sql
+
+
+            mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_To_Use'"
+            mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_To_Use','This specifies the path of the DHCP configuration file on this system. This file is the target of the DHCP updating mechanism.','$dhcptouse','DHCP')"
+
 
             mysql -s -D fog -e "TRUNCATE TABLE dhcpGlobals"
 
