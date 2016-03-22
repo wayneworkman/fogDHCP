@@ -200,7 +200,7 @@ while(1) {
 
 
 	// Write commands for this user, for this setting, to the setting's file.
-	$file = $DHCP_To_Use . ".fog";
+	$file = "/tmp/dhcpd.conf";
 	if (file_exists($file)) {
 		unlink($file);
 	}
@@ -213,13 +213,17 @@ while(1) {
 
 	if ($Current_DHCP_Checksum != $New_DHCP_Checksum) {
 		// Move file and restart service.
+		echo "Did not match, moving.";
 		unlink($DHCP_To_Use);
 		rename($file, $DHCP_To_Use);
 		
+	} else {
+		echo "Files matched.";
 	}
 
 
-
+	//Close connection.
+	$link->close();
 
 //end of loop.
 }
