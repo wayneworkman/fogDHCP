@@ -4,7 +4,7 @@ $servername="127.0.0.1";
 $username="root";
 $password="";
 $database="fog";
-$DHCP_Service_Sleep_Time=0;
+$DHCP_Service_Sleep_Time=60;
 $DHCP_To_Use="";
 $Current_DHCP_Checksum="";
 $New_DHCP_Checksum="";
@@ -12,21 +12,23 @@ $New_File="";
 $New_Line="\n";
 
 
+
+// Create connection
+$link = new mysqli($servername, $username, $password, $database);
+// Check connection
+if ($link->connect_error) {
+	// Couldn't establish a connection with the database.
+	die("Error");
+}
+
+
+
 //start loop.
 while(1) {
-	
-	// Sleep.
-	sleep($DHCP_Service_Sleep_Time);
 
 
-	// Create connection
-	$link = new mysqli($servername, $username, $password, $database);
-	// Check connection
-	if ($link->connect_error) {
-        	// Couldn't establish a connection with the database.
-        	die("Error");
-	}
-
+	//Clear out the contents of the New_File variable.
+	$New_File = "";
 
 
 	//Get sleep time.
@@ -34,7 +36,7 @@ while(1) {
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
-			$DHCP_Service_Sleep_Time = $row["settingValue"];
+			$DHCP_Service_Sleep_Time = trim($row["settingValue"]);
 		}
 	}
 	
@@ -44,11 +46,9 @@ while(1) {
         $result = $link->query($sql);
         if ($result->num_rows > 0) {
                 while($row = $result->fetch_assoc()) {
-                        $DHCP_To_Use = $row["settingValue"];
+                        $DHCP_To_Use = trim($row["settingValue"]);
                 }
         }
-
-
 
 
 
@@ -57,14 +57,11 @@ while(1) {
         $result = $link->query($sql);
         if ($result->num_rows > 0) {
                 while($row = $result->fetch_assoc()) {
-                        $dgOption = $row["dgOption"];
+                        $dgOption = trim($row["dgOption"]);
 			$New_File = $New_File . $dgOption . $New_Line;
                 }
         }
 	
-
-
-
 
 
 
@@ -73,25 +70,25 @@ while(1) {
         $result = $link->query($sql);
         if ($result->num_rows > 0) {
                 while($row = $result->fetch_assoc()) {
-			$dsID = $row["dsID"];
-                        $dsSubnet = $row["dsSubnet"];
-			$dsNetmask = $row["dsNetmask"];
-			$dsOptionSubnetMask = $row["dsOptionSubnetMask"];
-			$dsRangeDynamicBootpStart = $row["dsRangeDynamicBootpStart"];
-			$dsRangeDynamicBootpEnd = $row["dsRangeDynamicBootpEnd"];
-			$dsDefaultLeaseTime = $row["dsDefaultLeaseTime"];
-			$dsMaxLeaseTime = $row["dsMaxLeaseTime"];
-			$dsOptionRouters = $row["dsOptionRouters"];
-			$dsOptionDomainNameServers = $row["dsOptionDomainNameServers"];
-			$dsOptionNtpServers = $row["dsOptionNtpServers"];
-			$dsNextServer = $row["dsNextServer"];
-			$dsCustomArea1 = $row["dsCustomArea1"];
-			$dsCustomArea2 = $row["dsCustomArea2"];
-			$dsCustomArea3 = $row["dsCustomArea3"];
+			$dsID = trim($row["dsID"]);
+                        $dsSubnet = trim($row["dsSubnet"]);
+			$dsNetmask = trim($row["dsNetmask"]);
+			$dsOptionSubnetMask = trim($row["dsOptionSubnetMask"]);
+			$dsRangeDynamicBootpStart = trim($row["dsRangeDynamicBootpStart"]);
+			$dsRangeDynamicBootpEnd = trim($row["dsRangeDynamicBootpEnd"]);
+			$dsDefaultLeaseTime = trim($row["dsDefaultLeaseTime"]);
+			$dsMaxLeaseTime = trim($row["dsMaxLeaseTime"]);
+			$dsOptionRouters = trim($row["dsOptionRouters"]);
+			$dsOptionDomainNameServers = trim($row["dsOptionDomainNameServers"]);
+			$dsOptionNtpServers = trim($row["dsOptionNtpServers"]);
+			$dsNextServer = trim($row["dsNextServer"]);
+			$dsCustomArea1 = trim($row["dsCustomArea1"]);
+			$dsCustomArea2 = trim($row["dsCustomArea2"]);
+			$dsCustomArea3 = trim($row["dsCustomArea3"]);
 			
 			
-			$New_File = $New_File . "subnet " . $dsSubnet . " netmask " . $dsNetmask . "{" . $New_Line;
-
+			$New_File = $New_File . "subnet " . $dsSubnet . " netmask " . $dsNetmask . " {" . $New_Line;
+			
 			if ($dsOptionSubnetMask != "") {
 				$New_File = $New_File . "    option subnet-mask " . $dsOptionSubnetMask . ";" . $New_Line;
 			}
@@ -122,20 +119,21 @@ while(1) {
 			if ($dsCustomArea2 != "") {
 				$New_File = $New_File . "    " . $dsCustomArea2 . $New_Line;
                         }
-			if ($dsRangeDynamicBootpStart != "") {
+			if ($dsCustomArea3 != "") {
 				$New_File = $New_File . "    " . $dsCustomArea3 . $New_Line;
                         }
 
+			
 			//Build classes for this subnet.	
 			$sql = "SELECT * FROM dhcpClasses WHERE dc_dsID = $dsID ORDER BY dcID ASC";
         		$result2 = $link->query($sql);
         		if ($result2->num_rows > 0) {
                 		while($row2 = $result2->fetch_assoc()) {
-					$dcClass = $row2["dcClass"];
-					$dcMatch = $row2["dcMatch"];
-					$dcMatchOption1 = $row2["dcMatchOption1"];
-					$dcMatchOption2 = $row2["dcMatchOption2"];
-					$dcMatchOption3 = $row2["dcMatchOption3"];
+					$dcClass = trim($row2["dcClass"]);
+					$dcMatch = trim($row2["dcMatch"]);
+					$dcMatchOption1 = trim($row2["dcMatchOption1"]);
+					$dcMatchOption2 = trim($row2["dcMatchOption2"]);
+					$dcMatchOption3 = trim($row2["dcMatchOption3"]);
 					$New_File = $New_File . "    class \"" . $dcClass . "\" {" . $New_Line;
 					$New_File = $New_File . "        " . $dcMatch . $New_Line;
 					$New_File = $New_File . "        " . $dcMatchOption1 . $New_Line;
@@ -160,14 +158,14 @@ while(1) {
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
 
-			$drMAC = $row["drMAC"];
-			$drName = $row["drName"];
-			$drFilename = $row["drFilename"];
-			$drIP = $row["drIP"];
-			$drOptionDomainNameServers = $row["drOptionDomainNameServers"];
-			$drCustomArea1 = $row["drCustomArea1"];
-			$drCustomArea2 = $row["drCustomArea2"];
-			$drCustomArea3 = $row["drCustomArea3"];
+			$drMAC = trim($row["drMAC"]);
+			$drName = trim($row["drName"]);
+			$drFilename = trim($row["drFilename"]);
+			$drIP = trim($row["drIP"]);
+			$drOptionDomainNameServers = trim($row["drOptionDomainNameServers"]);
+			$drCustomArea1 = trim($row["drCustomArea1"]);
+			$drCustomArea2 = trim($row["drCustomArea2"]);
+			$drCustomArea3 = trim($row["drCustomArea3"]);
 
 
 			$New_File = $New_File . "host " . $drName . " {" . $New_Line;
@@ -180,7 +178,7 @@ while(1) {
                                 $New_File = $New_File . "    fixed-address " . $drIP . ";" . $New_Line;
                         }
 			if ($drOptionDomainNameServers != "") {
-                                $New_File = $New_File . "    option domain-name-servers " . $drFilename . ";" . $New_Line;
+                                $New_File = $New_File . "    option domain-name-servers " . $drOptionDomainNameServers . ";" . $New_Line;
                         }
 			if ($drCustomArea1 != "") {
                                 $New_File = $New_File . "    " . $drCustomArea1 . $New_Line;
@@ -199,7 +197,7 @@ while(1) {
 
 
 
-	// Write commands for this user, for this setting, to the setting's file.
+	// Write the conf file.
 	$file = "/tmp/dhcpd.conf";
 	if (file_exists($file)) {
 		unlink($file);
@@ -209,22 +207,25 @@ while(1) {
 	//Check MD5 Sum.
 	$Current_DHCP_Checksum = sha1_file($DHCP_To_Use);
 	$New_DHCP_Checksum = sha1_file($file);
-
+	echo $Current_DHCP_Checksum . "\n";
+	echo $New_DHCP_Checksum . "\n";
 
 	if ($Current_DHCP_Checksum != $New_DHCP_Checksum) {
 		// Move file and restart service.
-		echo "Did not match, moving.";
 		unlink($DHCP_To_Use);
-		rename($file, $DHCP_To_Use);
-		
+		rename($file, $DHCP_To_Use);	
 	} else {
-		echo "Files matched.";
+		unlink($file);
 	}
 
-
-	//Close connection.
-	$link->close();
+	
+	// Sleep.
+        sleep($DHCP_Service_Sleep_Time);
 
 //end of loop.
 }
+
+//Close connection.
+$link->close();
+
 ?>
