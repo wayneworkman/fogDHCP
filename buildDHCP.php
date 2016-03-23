@@ -39,6 +39,8 @@ while(1) {
 			$DHCP_Service_Sleep_Time = trim($row["settingValue"]);
 		}
 	}
+	$result->free();
+	
 	
 
 	//Get DHCP Config file.
@@ -49,7 +51,7 @@ while(1) {
                         $DHCP_To_Use = trim($row["settingValue"]);
                 }
         }
-
+	$result->free();
 
 
 	//Build Global Options into file.
@@ -62,7 +64,8 @@ while(1) {
 				$New_File .= "$dgOption$New_Line";
 			}
                 }
-        }	
+        }
+	$result->free();
 
 
 
@@ -150,7 +153,8 @@ while(1) {
 		$New_File .= "} $New_Line";
 		}
 	}
-
+	$result->free();
+	$result2->free();
 
 
 	//Build Reservations.
@@ -193,7 +197,7 @@ while(1) {
 			$New_File .= "} $New_Line";
 		}
 	}
-
+	$result->free();
 
 
 
