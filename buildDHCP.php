@@ -11,7 +11,7 @@ $New_DHCP_Checksum="";
 $New_File="";
 $New_Line="\n";
 $tmpFile = "/tmp/dhcpd.conf";
-
+$log = "/opt/fog/log/fogdhcp.log";
 
 // Create connection
 $link = new mysqli($servername, $username, $password, $database);
@@ -45,26 +45,26 @@ while(1) {
 
 	//Get DHCP Config file.
 	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_To_Use' LIMIT 1";
-        $result = $link->query($sql);
-        if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
-                        $DHCP_To_Use = trim($row["settingValue"]);
-                }
-        }
+	$result = $link->query($sql);
+	if ($result->num_rows > 0) {
+		while($row = $result->fetch_assoc()) {
+			$DHCP_To_Use = trim($row["settingValue"]);
+		}
+	}
 	$result->free();
 
 
 	//Build Global Options into file.
 	$sql = "SELECT dgOption FROM dhcpGlobals ORDER BY dgID ASC";
-        $result = $link->query($sql);
-        if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
-                        $dgOption = trim($row["dgOption"]);
+	$result = $link->query($sql);
+	if ($result->num_rows > 0) {
+		while($row = $result->fetch_assoc()) {
+			$dgOption = trim($row["dgOption"]);
 			if ($dgOption != "") {
 				$New_File .= "$dgOption$New_Line";
 			}
-                }
-        }
+		}
+	}
 	$result->free();
 
 
@@ -90,7 +90,9 @@ while(1) {
 			$dsCustomArea2 = trim($row["dsCustomArea2"]);
 			$dsCustomArea3 = trim($row["dsCustomArea3"]);
 
-
+			if (empty($dsSubnet) || empty($dsNetmask)) {
+				continue;
+			}
 			$New_File .= "subnet $dsSubnet netmask $dsNetmask { $New_Line";
 			
 			if ($dsOptionSubnetMask != "") {
@@ -138,6 +140,12 @@ while(1) {
 					$dcMatchOption1 = trim($row2["dcMatchOption1"]);
 					$dcMatchOption2 = trim($row2["dcMatchOption2"]);
 					$dcMatchOption3 = trim($row2["dcMatchOption3"]);
+
+
+
+					if (empty($dcClass)) {
+						continue;
+					}
 					$New_File .= "    class \"$dcClass\" { $New_Line";
 					$New_File .= "        $dcMatch$New_Line";
 					$New_File .= "        $dcMatchOption1$New_Line";
@@ -173,6 +181,10 @@ while(1) {
 			$drCustomArea3 = trim($row["drCustomArea3"]);
 
 
+
+			if (empty($drName) || empty($drMAC)) {
+				continue;
+			}
 			$New_File .= "host $drName { $New_Line";
 			$New_File .= "    hardware ethernet $drMAC;$New_Line";
 
@@ -212,9 +224,15 @@ while(1) {
 	if (file_exists($DHCP_To_Use)) {
 		$Current_DHCP_Checksum = sha1_file($DHCP_To_Use);
 	} else {
-		$Current_DHCP_Checksum = "";
+		$Current_DHCP_Checksum = "1";
 	}
-	$New_DHCP_Checksum = sha1_file($tmpFile);
+
+	if (file_exists($tmpFile)) {
+		$New_DHCP_Checksum = sha1_file($tmpFile);
+	} else {
+		$New_DHCP_Checksum = "2"
+	}
+	
 
 	echo $Current_DHCP_Checksum . "\n";
 	echo $New_DHCP_Checksum . "\n";
