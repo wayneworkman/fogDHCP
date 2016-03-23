@@ -58,7 +58,7 @@ while(1) {
         if ($result->num_rows > 0) {
                 while($row = $result->fetch_assoc()) {
                         $dgOption = trim($row["dgOption"]);
-			$New_File = $New_File . $dgOption . $New_Line;
+			$New_File .= "$dgOption$New_Line";
                 }
         }
 	
@@ -87,40 +87,40 @@ while(1) {
 			$dsCustomArea3 = trim($row["dsCustomArea3"]);
 			
 			
-			$New_File = $New_File . "subnet " . $dsSubnet . " netmask " . $dsNetmask . " {" . $New_Line;
+			$New_File .= "subnet $dsSubnet netmask $dsNetmask { $New_Line";
 			
 			if ($dsOptionSubnetMask != "") {
-				$New_File = $New_File . "    option subnet-mask " . $dsOptionSubnetMask . ";" . $New_Line;
+				$New_File .= "    option subnet-mask $dsOptionSubnetMask;$New_Line";
 			}
 			if ($dsRangeDynamicBootpStart != "" && $dsRangeDynamicBootpEnd != "") {
-				$New_File = $New_File . "    range dynamic-bootp " . $dsRangeDynamicBootpStart . " " . $dsRangeDynamicBootpEnd . ";" . $New_Line;
+				$New_File .= "    range dynamic-bootp $dsRangeDynamicBootpStart $dsRangeDynamicBootpEnd;$New_Line";
 			}
 			if ($dsDefaultLeaseTime != "") {
-				$New_File = $New_File . "    default-lease-time " . $dsDefaultLeaseTime . ";" . $New_Line;
+				$New_File .= "    default-lease-time $dsDefaultLeaseTime;$New_Line";
                         }
 			if ($dsMaxLeaseTime != "") {
-				$New_File = $New_File . "    max-lease-time " . $dsMaxLeaseTime . ";" . $New_Line;
+				$New_File .= "    max-lease-time $dsMaxLeaseTime;$New_Line";
                         }
 			if ($dsOptionRouters != "") {
-				$New_File = $New_File . "    option routers " . $dsOptionRouters . ";" . $New_Line;
+				$New_File .= "    option routers $dsOptionRouters;$New_Line";
                         }
 			if ($dsOptionDomainNameServers != "") {
-				$New_File = $New_File . "    option domain-name-servers " . $dsOptionDomainNameServers . ";" . $New_Line;
+				$New_File .= "    option domain-name-servers $dsOptionDomainNameServers;$New_Line";
                         }
 			if ($dsOptionNtpServers != "") {
-				$New_File = $New_File . "    option ntp-servers " . $dsOptionNtpServers . ";" . $New_Line;
+				$New_File .= "    option ntp-servers $dsOptionNtpServers;$New_Line";
                         }
 			if ($dsNextServer != "") {
-				$New_File = $New_File . "    next-server " . $dsNextServer . ";" . $New_Line;
+				$New_File .= "    next-server $dsNextServer;$New_Line";
                         }
 			if ($dsCustomArea1 != "") {
-				$New_File = $New_File . "    " . $dsCustomArea1 . $New_Line;
+				$New_File .= "    $dsCustomArea1$New_Line";
                         }
 			if ($dsCustomArea2 != "") {
-				$New_File = $New_File . "    " . $dsCustomArea2 . $New_Line;
+				$New_File .= "    $dsCustomArea2$New_Line";
                         }
 			if ($dsCustomArea3 != "") {
-				$New_File = $New_File . "    " . $dsCustomArea3 . $New_Line;
+				$New_File .= "    $dsCustomArea3$New_Line";
                         }
 
 			
@@ -134,19 +134,19 @@ while(1) {
 					$dcMatchOption1 = trim($row2["dcMatchOption1"]);
 					$dcMatchOption2 = trim($row2["dcMatchOption2"]);
 					$dcMatchOption3 = trim($row2["dcMatchOption3"]);
-					$New_File = $New_File . "    class \"" . $dcClass . "\" {" . $New_Line;
-					$New_File = $New_File . "        " . $dcMatch . $New_Line;
-					$New_File = $New_File . "        " . $dcMatchOption1 . $New_Line;
+					$New_File .= "    class \"$dcClass\" { $New_Line";
+					$New_File .= "        $dcMatch$New_Line";
+					$New_File .= "        $dcMatchOption1$New_Line";
 					if ($dcMatchOption2 != "") {
-						$New_File = $New_File . "        " . $dcMatchOption2 . $New_Line;
+						$New_File .= "        $dcMatchOption2$New_Line";
 					}
 					if ($dcMatchOption3 != "") {
-                                                $New_File = $New_File . "        " . $dcMatchOption3 . $New_Line;
+                                                $New_File .= "        $dcMatchOption3$New_Line";
                                         }
-					$New_File = $New_File . "    }" . $New_Line;
+					$New_File .= "    } $New_Line";
 				}
 			}
-		$New_File = $New_File . "}" . $New_Line;
+		$New_File .= "} $New_Line";
 		}
 	}
 
@@ -168,28 +168,28 @@ while(1) {
 			$drCustomArea3 = trim($row["drCustomArea3"]);
 
 
-			$New_File = $New_File . "host " . $drName . " {" . $New_Line;
-			$New_File = $New_File . "    hardware ethernet " . $drMAC . ";" . $New_Line;
+			$New_File .= "host $drName { $New_Line";
+			$New_File .= "    hardware ethernet $drMAC;$New_Line";
 			
 			if ($drFilename != "") {
-				$New_File = $New_File . "    filename \"" . $drFilename . "\";" . $New_Line;
+				$New_File .= "    filename \"$drFilename\";$New_Line";
 			}
 			if ($drIP != "") {
-                                $New_File = $New_File . "    fixed-address " . $drIP . ";" . $New_Line;
+                                $New_File .= "    fixed-address $drIP;$New_Line";
                         }
 			if ($drOptionDomainNameServers != "") {
-                                $New_File = $New_File . "    option domain-name-servers " . $drOptionDomainNameServers . ";" . $New_Line;
+                                $New_File .= "    option domain-name-servers $drOptionDomainNameServers;$New_Line";
                         }
 			if ($drCustomArea1 != "") {
-                                $New_File = $New_File . "    " . $drCustomArea1 . $New_Line;
+                                $New_File .= "    $drCustomArea1$New_Line";
                         }
 			if ($drCustomArea2 != "") {
-                                $New_File = $New_File . "    " . $drCustomArea2 . $New_Line;
+                                $New_File .= "    $drCustomArea2$New_Line";
                         }
 			if ($drCustomArea3 != "") {
-                                $New_File = $New_File . "    " . $drCustomArea3 . $New_Line;
+                                $New_File .= "    $drCustomArea3$New_Line";
                         }
-			$New_File = $New_File . "}" . $New_Line;
+			$New_File .= "} $New_Line";
 		}
 	}
 
@@ -209,7 +209,6 @@ while(1) {
 	$New_DHCP_Checksum = sha1_file($file);
 	echo $Current_DHCP_Checksum . "\n";
 	echo $New_DHCP_Checksum . "\n";
-
 	if ($Current_DHCP_Checksum != $New_DHCP_Checksum) {
 		// Move file and restart service.
 		unlink($DHCP_To_Use);
