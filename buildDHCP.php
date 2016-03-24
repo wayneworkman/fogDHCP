@@ -5,17 +5,15 @@ $username="root";
 $password="";
 $database="fog";
 $DHCP_Service_Sleep_Time=60;
-$DHCP_To_Use="";
+$DHCP_To_Use="/etc/dhcp/dhcpd.conf";
 $Current_DHCP_Checksum="";
 $New_DHCP_Checksum="";
 $New_File="";
 $New_Line="\n";
-$tmpFile = "/tmp/dhcpd.conf";
+$tmpFile = "$DHCP_To_Use.tmp";
 $log = "/opt/fog/log/fogdhcp.log";
 $TimeZone="UTC";
 date_default_timezone_set($TimeZone);
-
-
 
 
 
@@ -32,6 +30,7 @@ function WriteLog($Message) {
 	}
 	file_put_contents($log, $current);
 }
+
 
 
 
@@ -69,8 +68,12 @@ while(1) {
 			$TimeZone = trim($row["settingValue"]);
 			if ($TimeZone != "" ) {
 				date_default_timezone_set($TimeZone);
+			} else {
+				WriteLog("The FOG_TZ_INFO only has white space in it. Default timezone of \"$TimeZone\" is set.");
 			}
 		}
+	} else {
+		WriteLog("Could not get the FOG_TZ_INFO (timezone) from the globalSettings table. Default timezone of \"$TimeZone\" is set.");
 	}
 	$result->free();
 
@@ -82,8 +85,15 @@ while(1) {
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
-			$DHCP_Service_Sleep_Time = trim($row["settingValue"]);
+			$tmp = trim($row["settingValue"]);
+			if ($tmp != "") {
+				$DHCP_Service_Sleep_Time = $tmp;
+			} else {
+				WriteLog("The DHCP_Service_Sleep_Time setting in the globalSettings table only has white space in it. Default sleep time \"$DHCP_Service_Sleep_Time\" is set.");
+			}
 		}
+	} else {
+		WriteLog("Could not get the DHCP_Service_Sleep_Time from the globalSettings table. Default sleep time \"$DHCP_Service_Sleep_Time\" is set.");
 	}
 	$result->free();
 
@@ -96,8 +106,15 @@ while(1) {
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
-			$log = trim($row["settingValue"]) . "fogdhcp.log";
+			$tmp = trim($row["settingValue"]);
+			if ($tmp != "") {
+				$log = $tmp . "fogdhcp.log";
+			} else {
+				WriteLog("The SERVICE_LOG_PATH setting in the globalSettings table only has white space in it. Default log \"$log\" is set.");
+			}
 		}
+	} else {
+		WriteLog("Could not get the SERVICE_LOG_PATH from the globalSettings table. Default log \"$log\" is set.");
 	}
 	$result->free();
 
@@ -110,8 +127,15 @@ while(1) {
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
-			$DHCP_To_Use = trim($row["settingValue"]);
+			$tmp = trim($row["settingValue"]);
+			if ($tmp != "") {
+				$DHCP_To_Use = $tmp;
+			} else {
+				WriteLog("The DHCP_To_Use setting in the globalSettings table only has white space in it. Default file \"$DHCP_To_Use\" is set.");
+			}
 		}
+	} else {
+		WriteLog("Could not get the DHCP_To_Use fro mthe globalSettings table. Default file \"$DHCP_To_Use\" is set.");
 	}
 	$result->free();
 
@@ -119,15 +143,20 @@ while(1) {
 
 
 	//Build Global Options into file.
-	$sql = "SELECT dgOption FROM dhcpGlobals ORDER BY dgID ASC";
+	$sql = "SELECT dgOption,dgID FROM dhcpGlobals ORDER BY dgID ASC";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
 			$dgOption = trim($row["dgOption"]);
+			$tmp = trim($row["dgID"]);
 			if ($dgOption != "") {
 				$New_File .= "$dgOption$New_Line";
+			} else {
+				WriteLog("The dhcp Global option with ID number \"$tmp\" only has white space.");
 			}
 		}
+	} else {
+		WriteLog("No global DHCP options could be found in the dhcpGlobals table. This is probably not good.");
 	}
 	$result->free();
 
@@ -157,7 +186,12 @@ while(1) {
 
 
 
-			if (empty($dsSubnet) || empty($dsNetmask)) {
+			if ( empty($dsSubnet) || empty($dsNetmask) ) {
+				if ( empty($dsSubnet) ) {
+					WriteLog("Inside the dhcpSubnets table, the row with ID \"$dsID\" only has white space for it's dsSubnet field. Because of this, this particular subnet will be skipped.");
+				} else {
+					WriteLog("Inside the dhcpSubnets table, the row with ID \"$dsID\" only has white space for it's dsNetmask field. Because of this, this particular subnet will be skipped.");
+				}
 				continue;
 			}
 			$New_File .= "subnet $dsSubnet netmask $dsNetmask { $New_Line";
@@ -203,6 +237,7 @@ while(1) {
         		$result2 = $link->query($sql);
         		if ($result2->num_rows > 0) {
 				while($row2 = $result2->fetch_assoc()) {
+					$tmp = trim($row2["dcID"]);
 					$dcClass = trim($row2["dcClass"]);
 					$dcMatch = trim($row2["dcMatch"]);
 					$dcMatchOption1 = trim($row2["dcMatchOption1"]);
@@ -212,7 +247,14 @@ while(1) {
 
 
 
-					if (empty($dcClass)) {
+					if ( empty($dcClass) || empty($dcMatch) || empty($dcMatchOption1) ) {
+						if ( empty($dcClass)) {
+							WriteLog("The class with ID \"$tmp\" inside the dhcpClasses table only had whitespace for the dcClass field. Because of this, this class is being skipped.");
+						} else if ( empty($dcMatch) ) {
+							WriteLog("The class with ID \"$tmp\" inside the dhcpClasses table only had whitespace for the dcMatch field. Because of this, this class is being skipped.");
+						} else {
+							WriteLog("The class with ID \"$tmp\" inside the dhcpClasses table only had whitespace for the dcMatchOption1 field. Because of this, this class is being skipped.");
+						}
 						continue;
 					}
 					$New_File .= "    class \"$dcClass\" { $New_Line";
@@ -241,7 +283,8 @@ while(1) {
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
-
+			
+			$tmp = trim($row["drID"]);
 			$drMAC = trim($row["drMAC"]);
 			$drName = trim($row["drName"]);
 			$drFilename = trim($row["drFilename"]);
@@ -255,6 +298,11 @@ while(1) {
 
 
 			if (empty($drName) || empty($drMAC)) {
+				if ( empty($drName) ) {
+					WriteLog("The dhcp reservation with ID \"$tmp\" inside the dhcpReservations table only has white space for the field drName. Because of this, this reservation is being skipped.");
+				} else {
+					WriteLog("The dhcp reservation with ID \"$tmp\" inside the dhcpReservations table only has white space for the field drMAC. Because of this, this reservation is being skipped.");
+				}
 				continue;
 			}
 			$New_File .= "host $drName { $New_Line";
@@ -289,8 +337,14 @@ while(1) {
 	// Write the conf file to the temp location.
 	if (file_exists($tmpFile)) {
 		unlink($tmpFile);
+		if (file_exists($tmpFile)) {
+			WriteLog("Deleting the temporary DHCP config file from \"$tmpFile\" failed for some reason. Check permissions and maybe SELinux.");
+        	} else {
+			file_put_contents($tmpFile, $New_File);
+		}
+	} else {
+		file_put_contents($tmpFile, $New_File);
 	}
-	file_put_contents($tmpFile, $New_File);
 	
 
 
@@ -299,7 +353,8 @@ while(1) {
 	if (file_exists($DHCP_To_Use)) {
 		$Current_DHCP_Checksum = sha1_file($DHCP_To_Use);
 	} else {
-		$Current_DHCP_Checksum = "1";
+		WriteLog("The DHCP configuration file \"$DHCP_To_Use\" does not exist. Because of this, the temporary DHCP file will not be swapped out in place of where the current DHCP file should be. You should investigate why it's missing. Is the path correct? Is DHCP installed? Are permissions OK? Could it be SELinux?");
+		$Current_DHCP_Checksum = "0";
 	}
 
 
@@ -308,21 +363,49 @@ while(1) {
 	if (file_exists($tmpFile)) {
 		$New_DHCP_Checksum = sha1_file($tmpFile);
 	} else {
-		$New_DHCP_Checksum = "2";
+		WriteLog("The new DHCP configuration file \"$tmpFile\" was supposed to be written moments ago, but does not exist now. Because of this, the temporary DHCP file will not be moved into the position of the current DHCP file. Something might be wrong with permissions, the path, or possibly SELinux. The partition might be full as well. You should investigate.");
+		$New_DHCP_Checksum = "1";
 	}
 	
 
 
 	//Check if files match or not. If not, put the new file in place and restart the DHCP service.
 	if ($Current_DHCP_Checksum != $New_DHCP_Checksum) {
-		// Move file and restart service.
-		if (file_exists($DHCP_To_Use)) {
-			unlink($DHCP_To_Use);
-		}
-		rename($tmpFile, $DHCP_To_Use);	
+		if ($New_DHCP_Checksum != "1" && $Current_DHCP_Checksum != "0") {
+			WriteLog("The newly generated DHCP file's checksum does not match the checksum of the currently in use DHCP file. Attempting to move the current file to \"$DHCP_To_Use.old\" and attempting to place the newly generated file \"$tmpFile\" in it's place.");
+			// Move old file.
+			if (file_exists($DHCP_To_Use)) {
+				// Delete pre-existing old file.
+				if (file_exists("$DHCP_To_Use.old")) {
+					unlink("$DHCP_To_Use.old");
+				}
+				// Move current to old.
+				rename($DHCP_To_Use, "$DHCP_To_Use.old");
+			}
+			// Place new file.
+			rename($tmpFile, $DHCP_To_Use);	
+			if (file_exists($DHCP_To_Use)) { 
+				$Current_DHCP_Checksum = sha1_file($DHCP_To_Use);
+				if ($Current_DHCP_Checksum != $New_DHCP_Checksum) {
+					WriteLog("The new DHCP file was moved to \"$DHCP_To_Use\" but for some reason the move did not complete correctly, because the new checksum for the newly placed file does not match what it was before the move happened. You should investigate. For now, we will try to move the broken file to \"$DHCP_To_Use.broke\" for you to look at and move the \"$DHCP_To_Use.old\" back into place.");
+					rename($DHCP_To_Use, "$DHCP_To_Use.broke");
+					rename("$DHCP_To_Use.old", $DHCP_To_Use);
+				} else {
+					WriteLog("Moving the files succeeded, attempting to restart the DHCP service.");
+					//Restart the service here.
+
+
+
+				}
+			} else {
+				WriteLog("The DHCP configuration file \"$DHCP_To_Use\" that was placed moments ago is missing. You should investigate why it's missing. Is the path correct? Is DHCP installed? Are permissions OK? Could it be SELinux? For now, we will try to put \"$DHCP_To_Use.old\" back into place.");
+				rename("$DHCP_To_Use.old", $DHCP_To_Use);
+			}
+		}	
 	} else {
 		unlink($tmpFile);
 	}
+	
 
 
 
