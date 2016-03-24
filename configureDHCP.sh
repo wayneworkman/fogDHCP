@@ -169,6 +169,8 @@ configureDHCP() {
             echo "}" >> "$dhcptouse"
             case $systemctl in
                 yes)
+                    mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Restart_Command','This specifies the commands used to restart the DHCP service on this system.','systemctl stop $dhcpd\;sleep 2\;systemctl start $dhcpd','DHCP')"
+                    mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Status_Command','This specifies the command used to get the status of the local DHCP service.','systemctl status $dhcpd','DHCP')"
                     systemctl enable $dhcpd >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                     systemctl stop $dhcpd >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                     sleep 2
@@ -179,6 +181,8 @@ configureDHCP() {
                 *)
                     case $osid in
                         1)
+                            mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Restart_Commands','This specifies the commands used to restart the DHCP service on this system.','service $dhcpd stop\;sleep 2\;service $dhcpd start','DHCP')"
+                            mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Status_Command','This specifies the command used to get the status of the local DHCP service.','service status $dhcpd','DHCP')"
                             chkconfig $dhcpd on >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             service $dhcpd stop >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             sleep 2
@@ -187,6 +191,8 @@ configureDHCP() {
                             service status $dhcpd >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             ;;
                         2)
+                            mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Restart_Commands','This specifies the commands used to restart the DHCP service on this system.','/etc/init.d/$dhcpd\;sleep 2\;/etc/init.d/$dhcpd','DHCP')"
+                            mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Status_Command','This specifies the command used to get the status of the local DHCP service.','echo \"DHCP status not available on this system.\"','DHCP')"
                             sysv-rc-conf $dhcpd on >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             /etc/init.d/$dhcpd stop >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             sleep 2

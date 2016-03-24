@@ -14,6 +14,8 @@ $tmpFile = "$DHCP_To_Use.tmp";
 $log = "/opt/fog/log/fogdhcp.log";
 $TimeZone="UTC";
 date_default_timezone_set($TimeZone);
+$DHCP_Restart_Command="service dhcpd restart";
+$DHCP_Status_Command="service dhcpd status";
 
 
 
@@ -135,9 +137,52 @@ while(1) {
 			}
 		}
 	} else {
-		WriteLog("Could not get the DHCP_To_Use fro mthe globalSettings table. Default file \"$DHCP_To_Use\" is set.");
+		WriteLog("Could not get the DHCP_To_Use from the globalSettings table. Default file \"$DHCP_To_Use\" is set.");
 	}
 	$result->free();
+
+
+
+
+
+	// Get DHCP Restart command.
+	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_Restart_Command' LIMIT 1";
+	$result = $link->query($sql);
+	if ($result->num_rows > 0) {
+		while($row = $result->fetch_assoc()) {
+			$tmp = trim($row["settingValue"]);
+			if ($tmp != "") {
+				$DHCP_Restart_Command = $tmp;
+			} else {
+				WriteLog("The DHCP_Restart_Command setting in the globalSettings table only has white space in it. Default command \"$DHCP_Restart_Command\" is set.");
+			}
+		}
+	} else {
+		WriteLog("Could not get the DHCP_Restart_Command from the globalSettings table. Default command \"$DHCP_Restart_Command\" is set.");
+	}
+	$result->free();
+
+
+
+
+
+	// Get DHCP Status command.
+	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_Status_Command' LIMIT 1";
+	$result = $link->query($sql);
+	if ($result->num_rows > 0) {
+		while($row = $result->fetch_assoc()) {
+			$tmp = trim($row["settingValue"]);
+			if ($tmp != "") {
+				$DHCP_Status_Command = $tmp;
+			} else {
+				WriteLog("The DHCP_Status_Command setting in the globalSettings table only has white space in it. Default command \"$DHCP_Status_Command\" is set.");
+			}
+		}
+	} else {
+		WriteLog("Could not get the DHCP_Status_Command from the globalSettings table. Default command \"$DHCP_Status_Command\" is set.");
+	}
+	$result->free();
+
 
 
 
@@ -393,9 +438,8 @@ while(1) {
 				} else {
 					WriteLog("Moving the files succeeded, attempting to restart the DHCP service.");
 					//Restart the service here.
-
-
-
+					WriteLog(shell_exec($DHCP_Restart_Command));
+					WriteLog(shell_exec($DHCP_Status_Command));
 				}
 			} else {
 				WriteLog("The DHCP configuration file \"$DHCP_To_Use\" that was placed moments ago is missing. You should investigate why it's missing. Is the path correct? Is DHCP installed? Are permissions OK? Could it be SELinux? For now, we will try to put \"$DHCP_To_Use.old\" back into place.");
@@ -403,6 +447,7 @@ while(1) {
 			}
 		}	
 	} else {
+		WriteLog("The new and current configs are identical.");
 		unlink($tmpFile);
 	}
 	
