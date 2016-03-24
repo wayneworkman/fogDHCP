@@ -44,8 +44,12 @@ function WriteLog($Message) {
 while(1) {
 
 
+
+
 	//Clear out the contents of the New_File variable.
 	$New_File = "";
+
+
 
 
 	//Get sleep time.
@@ -60,6 +64,8 @@ while(1) {
 	
 
 	
+
+
 	//Get the logs path.
 	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'SERVICE_LOG_PATH' LIMIT 1";
 	$result = $link->query($sql);
@@ -72,6 +78,8 @@ while(1) {
 
 	
 
+
+
 	//Get DHCP Config file.
 	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_To_Use' LIMIT 1";
 	$result = $link->query($sql);
@@ -81,6 +89,8 @@ while(1) {
 		}
 	}
 	$result->free();
+
+
 
 
 	//Build Global Options into file.
@@ -95,6 +105,7 @@ while(1) {
 		}
 	}
 	$result->free();
+
 
 
 
@@ -118,6 +129,8 @@ while(1) {
 			$dsCustomArea1 = trim($row["dsCustomArea1"]);
 			$dsCustomArea2 = trim($row["dsCustomArea2"]);
 			$dsCustomArea3 = trim($row["dsCustomArea3"]);
+
+
 
 			if (empty($dsSubnet) || empty($dsNetmask)) {
 				continue;
@@ -159,6 +172,7 @@ while(1) {
 			}
 
 
+
 			//Build classes for this subnet.	
 			$sql = "SELECT * FROM dhcpClasses WHERE dc_dsID = $dsID ORDER BY dcID ASC";
         		$result2 = $link->query($sql);
@@ -169,6 +183,7 @@ while(1) {
 					$dcMatchOption1 = trim($row2["dcMatchOption1"]);
 					$dcMatchOption2 = trim($row2["dcMatchOption2"]);
 					$dcMatchOption3 = trim($row2["dcMatchOption3"]);
+
 
 
 
@@ -194,6 +209,8 @@ while(1) {
 	$result2->free();
 
 
+
+
 	//Build Reservations.
 	$sql = "SELECT * FROM dhcpReservations ORDER BY drID ASC";
 	$result = $link->query($sql);
@@ -208,6 +225,7 @@ while(1) {
 			$drCustomArea1 = trim($row["drCustomArea1"]);
 			$drCustomArea2 = trim($row["drCustomArea2"]);
 			$drCustomArea3 = trim($row["drCustomArea3"]);
+
 
 
 
@@ -251,7 +269,8 @@ while(1) {
 	
 
 
-	//Check MD5 Sum.
+
+	//Checksum of current file.
 	if (file_exists($DHCP_To_Use)) {
 		$Current_DHCP_Checksum = sha1_file($DHCP_To_Use);
 	} else {
@@ -260,6 +279,7 @@ while(1) {
 
 
 
+	//Checksum of new file.
 	if (file_exists($tmpFile)) {
 		$New_DHCP_Checksum = sha1_file($tmpFile);
 	} else {
@@ -268,6 +288,7 @@ while(1) {
 	
 
 
+	//Check if files match or not. If not, put the new file in place and restart the DHCP service.
 	if ($Current_DHCP_Checksum != $New_DHCP_Checksum) {
 		// Move file and restart service.
 		if (file_exists($DHCP_To_Use)) {
@@ -279,11 +300,17 @@ while(1) {
 	}
 
 
+
+
 	// Sleep.
 	sleep($DHCP_Service_Sleep_Time);
 
+
+
+
 //end of loop.
 }
+
 
 //Close connection.
 $link->close();
