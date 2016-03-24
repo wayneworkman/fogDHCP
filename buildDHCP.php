@@ -23,6 +23,23 @@ if ($link->connect_error) {
 
 
 
+//Function to write to the log.
+function WriteLog($Message) {
+	global $log;
+	global $New_Line;
+	if (file_exists($log)) {
+		$current = file_get_contents($log);
+		$current .= "$Message$New_Line";	
+	} else {
+		$current = "$Message$New_Line";
+	}
+	file_put_contents($log, $current);
+}
+
+
+
+
+
 //start loop.
 while(1) {
 
@@ -41,6 +58,18 @@ while(1) {
 	}
 	$result->free();
 	
+
+	
+	//Get the logs path.
+	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'SERVICE_LOG_PATH' LIMIT 1";
+	$result = $link->query($sql);
+	if ($result->num_rows > 0) {
+		while($row = $result->fetch_assoc()) {
+			$log = trim($row["settingValue"]) . "fogdhcp.log";
+		}
+	}
+	$result->free();
+
 	
 
 	//Get DHCP Config file.
@@ -214,12 +243,14 @@ while(1) {
 
 
 
-	// Write the conf file.
+	// Write the conf file to the temp location.
 	if (file_exists($tmpFile)) {
 		unlink($tmpFile);
 	}
 	file_put_contents($tmpFile, $New_File);
 	
+
+
 	//Check MD5 Sum.
 	if (file_exists($DHCP_To_Use)) {
 		$Current_DHCP_Checksum = sha1_file($DHCP_To_Use);
@@ -227,15 +258,15 @@ while(1) {
 		$Current_DHCP_Checksum = "1";
 	}
 
+
+
 	if (file_exists($tmpFile)) {
 		$New_DHCP_Checksum = sha1_file($tmpFile);
 	} else {
-		$New_DHCP_Checksum = "2"
+		$New_DHCP_Checksum = "2";
 	}
 	
 
-	echo $Current_DHCP_Checksum . "\n";
-	echo $New_DHCP_Checksum . "\n";
 
 	if ($Current_DHCP_Checksum != $New_DHCP_Checksum) {
 		// Move file and restart service.
