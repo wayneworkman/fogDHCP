@@ -12,14 +12,10 @@ $New_File="";
 $New_Line="\n";
 $tmpFile = "/tmp/dhcpd.conf";
 $log = "/opt/fog/log/fogdhcp.log";
+$TimeZone="UTC";
+date_default_timezone_set($TimeZone);
 
-// Create connection
-$link = new mysqli($servername, $username, $password, $database);
-// Check connection
-if ($link->connect_error) {
-	// Couldn't establish a connection with the database.
-	die("Error");
-}
+
 
 
 
@@ -27,14 +23,28 @@ if ($link->connect_error) {
 function WriteLog($Message) {
 	global $log;
 	global $New_Line;
+	$Now=date("Y-m-d  h:i:sa");
 	if (file_exists($log)) {
 		$current = file_get_contents($log);
-		$current .= "$Message$New_Line";	
+		$current .= "$Now  $Message$New_Line";	
 	} else {
-		$current = "$Message$New_Line";
+		$current = "$Now  $Message$New_Line";
 	}
 	file_put_contents($log, $current);
 }
+
+
+
+
+// Create connection
+$link = new mysqli($servername, $username, $password, $database);
+// Check connection
+if ($link->connect_error) {
+        // Couldn't establish a connection with the database.
+	WriteLog("Couldn't establish a connection with the database.");
+        die("Error");
+}
+
 
 
 
@@ -51,6 +61,21 @@ while(1) {
 
 
 
+	//Get the timezone.
+	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'FOG_TZ_INFO' LIMIT 1";
+	$result = $link->query($sql);
+	if ($result->num_rows > 0) {
+		while($row = $result->fetch_assoc()) {
+			$TimeZone = trim($row["settingValue"]);
+			if ($TimeZone != "" ) {
+				date_default_timezone_set($TimeZone);
+			}
+		}
+	}
+	$result->free();
+
+
+
 
 	//Get sleep time.
 	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_Service_Sleep_Time' LIMIT 1";
@@ -61,9 +86,9 @@ while(1) {
 		}
 	}
 	$result->free();
-	
 
-	
+
+
 
 
 	//Get the logs path.
