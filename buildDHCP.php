@@ -14,8 +14,7 @@ $tmpFile = "$DHCP_To_Use.tmp";
 $log = "/opt/fog/log/fogdhcp.log";
 $TimeZone="UTC";
 date_default_timezone_set($TimeZone);
-$DHCP_Restart_Command="service dhcpd restart";
-$DHCP_Status_Command="service dhcpd status";
+$DHCP_Method="1";
 
 
 
@@ -23,7 +22,7 @@ $DHCP_Status_Command="service dhcpd status";
 function WriteLog($Message) {
 	global $log;
 	global $New_Line;
-	$Now=date("Y-m-d  h:i:sa");
+	$Now=date("[Y-m-d  h:i:sa]");
 	if (file_exists($log)) {
 		$current = file_get_contents($log);
 		$current .= "$Now  $Message$New_Line";	
@@ -145,44 +144,22 @@ while(1) {
 
 
 
-	// Get DHCP Restart command.
-	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_Restart_Command' LIMIT 1";
+	// Get DHCP Method.
+	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_Method' LIMIT 1";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
 			$tmp = trim($row["settingValue"]);
 			if ($tmp != "") {
-				$DHCP_Restart_Command = $tmp;
+				$DHCP_Method = $tmp;
 			} else {
-				WriteLog("The DHCP_Restart_Command setting in the globalSettings table only has white space in it. Default command \"$DHCP_Restart_Command\" is set.");
+				WriteLog("The DHCP_Method setting in the globalSettings table only has white space in it. Default option \"$DHCP_Method\" is set.");
 			}
 		}
 	} else {
-		WriteLog("Could not get the DHCP_Restart_Command from the globalSettings table. Default command \"$DHCP_Restart_Command\" is set.");
+		WriteLog("Could not get the DHCP_Method from the globalSettings table. Default option \"$DHCP_Method\" is set.");
 	}
 	$result->free();
-
-
-
-
-
-	// Get DHCP Status command.
-	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_Status_Command' LIMIT 1";
-	$result = $link->query($sql);
-	if ($result->num_rows > 0) {
-		while($row = $result->fetch_assoc()) {
-			$tmp = trim($row["settingValue"]);
-			if ($tmp != "") {
-				$DHCP_Status_Command = $tmp;
-			} else {
-				WriteLog("The DHCP_Status_Command setting in the globalSettings table only has white space in it. Default command \"$DHCP_Status_Command\" is set.");
-			}
-		}
-	} else {
-		WriteLog("Could not get the DHCP_Status_Command from the globalSettings table. Default command \"$DHCP_Status_Command\" is set.");
-	}
-	$result->free();
-
 
 
 
@@ -204,6 +181,52 @@ while(1) {
 		WriteLog("No global DHCP options could be found in the dhcpGlobals table. This is probably not good.");
 	}
 	$result->free();
+
+
+
+
+
+
+
+
+	//Build global classes. All classes with a dc_dsID greater than one-million are global.   
+	$sql = "SELECT * FROM dhcpClasses WHERE dc_dsID = 2000000 ORDER BY dcID ASC";
+	$result2 = $link->query($sql);
+		if ($result2->num_rows > 0) {
+			while($row2 = $result2->fetch_assoc()) {
+				$tmp = trim($row2["dcID"]);
+				$dcClass = trim($row2["dcClass"]);
+				$dcMatch = trim($row2["dcMatch"]);
+				$dcMatchOption1 = trim($row2["dcMatchOption1"]);
+				$dcMatchOption2 = trim($row2["dcMatchOption2"]);
+				$dcMatchOption3 = trim($row2["dcMatchOption3"]);
+
+
+
+				if ( empty($dcClass) || empty($dcMatch) || empty($dcMatchOption1) ) {
+					if ( empty($dcClass)) {
+						WriteLog("The class with ID \"$tmp\" inside the dhcpClasses table only had whitespace for the dcClass field. Because of this, this class is being skipped.");
+					} else if ( empty($dcMatch) ) {
+						WriteLog("The class with ID \"$tmp\" inside the dhcpClasses table only had whitespace for the dcMatch field. Because of this, this class is being skipped.");
+					} else {
+						WriteLog("The class with ID \"$tmp\" inside the dhcpClasses table only had whitespace for the dcMatchOption1 field. Because of this, this class is being skipped.");
+					}
+				continue;
+				}
+				$New_File .= "class \"$dcClass\" { $New_Line";
+				$New_File .= "    $dcMatch$New_Line";
+				$New_File .= "    $dcMatchOption1$New_Line";
+				if ($dcMatchOption2 != "") {
+					$New_File .= "    $dcMatchOption2$New_Line";
+				}
+				if ($dcMatchOption3 != "") {
+					$New_File .= "    $dcMatchOption3$New_Line";
+				}
+			$New_File .= "} $New_Line";
+			}
+		}
+
+
 
 
 
@@ -397,6 +420,12 @@ while(1) {
 	//Checksum of current file.
 	if (file_exists($DHCP_To_Use)) {
 		$Current_DHCP_Checksum = sha1_file($DHCP_To_Use);
+		//Check it twice.
+		$tmp = sha1_file($DHCP_To_Use);
+		if ($tmp != $Current_DHCP_Checksum) {
+			WriteLog("The DHCP configuration file \"$DHCP_To_Use\" failed to be checksumed correctly. No action will be taken with the DHCP configuration file or the DHCP service. This can be due to RAM issues, a failing HDD or possibly other causes.");
+			$Current_DHCP_Checksum = "0";
+		}
 	} else {
 		WriteLog("The DHCP configuration file \"$DHCP_To_Use\" does not exist. Because of this, the temporary DHCP file will not be swapped out in place of where the current DHCP file should be. You should investigate why it's missing. Is the path correct? Is DHCP installed? Are permissions OK? Could it be SELinux?");
 		$Current_DHCP_Checksum = "0";
@@ -407,6 +436,12 @@ while(1) {
 	//Checksum of new file.
 	if (file_exists($tmpFile)) {
 		$New_DHCP_Checksum = sha1_file($tmpFile);
+		//Check it twice.
+		$tmp = sha1_file($tmpFile);
+		if ($tmp != $New_DHCP_Checksum) {
+			WriteLog("The new DHCP configuration file \"$tmpFile\" failed to be checksumed correctly. No action will be taken with the DHCP configuration file or the DHCP service. This can be due to RAM issues, a failing HDD or possibly other causes.");
+			$New_DHCP_Checksum = "1";
+		}
 	} else {
 		WriteLog("The new DHCP configuration file \"$tmpFile\" was supposed to be written moments ago, but does not exist now. Because of this, the temporary DHCP file will not be moved into the position of the current DHCP file. Something might be wrong with permissions, the path, or possibly SELinux. The partition might be full as well. You should investigate.");
 		$New_DHCP_Checksum = "1";
@@ -417,7 +452,7 @@ while(1) {
 	//Check if files match or not. If not, put the new file in place and restart the DHCP service.
 	if ($Current_DHCP_Checksum != $New_DHCP_Checksum) {
 		if ($New_DHCP_Checksum != "1" && $Current_DHCP_Checksum != "0") {
-			WriteLog("The newly generated DHCP file's checksum does not match the checksum of the currently in use DHCP file. Attempting to move the current file to \"$DHCP_To_Use.old\" and attempting to place the newly generated file \"$tmpFile\" in it's place.");
+			WriteLog("The newly generated DHCP files checksum does not match the checksum of the currently in use DHCP file. Attempting to move the current file to \"$DHCP_To_Use.old\" and attempting to place the newly generated file \"$tmpFile\" in it's place.");
 			// Move old file.
 			if (file_exists($DHCP_To_Use)) {
 				// Delete pre-existing old file.
@@ -438,8 +473,17 @@ while(1) {
 				} else {
 					WriteLog("Moving the files succeeded, attempting to restart the DHCP service.");
 					//Restart the service here.
-					WriteLog(shell_exec($DHCP_Restart_Command));
-					WriteLog(shell_exec($DHCP_Status_Command));
+					if ($DHCP_Method == "1") {
+						WriteLog(shell_exec('service dhcpd stop;sleep 2;service dhcpd start;sleep 2;service dhcpd status'));
+					} else if ($DHCP_Method == "2") {
+						WriteLog(shell_exec('service dhcpd stop;sleep 2;service dhcpd start'));
+					} else if ($DHCP_Method == "3") {
+						WriteLog(shell_exec('systemctl stop dhcpd;sleep 2;systemctl start dhcpd;sleep 2;systemctl status dhcpd'));
+					} else if ($DHCP_Method == "0") {
+						WriteLog("The settingKey \"DHCP_Method\" in the globalSettings table is set to 0, no interaction with the system's DHCP service will be attempted.");
+					} else {
+						WriteLog("The settingKey \"DHCP_Method\" in the globalSettings table is set to something that is not supported. Check for typos, white spaces, and other odd things.");
+					}
 				}
 			} else {
 				WriteLog("The DHCP configuration file \"$DHCP_To_Use\" that was placed moments ago is missing. You should investigate why it's missing. Is the path correct? Is DHCP installed? Are permissions OK? Could it be SELinux? For now, we will try to put \"$DHCP_To_Use.old\" back into place.");
@@ -447,7 +491,8 @@ while(1) {
 			}
 		}	
 	} else {
-		WriteLog("The new and current configs are identical.");
+		//If everything is good, there is no need to print anything. However, the below line can be un-commented should it be needed.
+		//WriteLog("The new and current configs are identical.");
 		unlink($tmpFile);
 	}
 	

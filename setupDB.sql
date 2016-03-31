@@ -52,7 +52,3 @@ PRIMARY KEY (drID)
 );
 
 
-DELETE FROM globalSettings WHERE settingKey = 'DHCP_Service_Sleep_Time';
-INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Service_Sleep_Time','This setting controls how often the DHCP service will check for changes made to DHCP settings in FOG, and if there are changes, updates the DHCP configuration file.','60','FOG Linux Service Sleep Times');
-
-

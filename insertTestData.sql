@@ -8,3 +8,5 @@ INSERT INTO dhcpReservations (drMAC,drName,drIP) VALUES ('30:b5:c2:c9:20:9b','TP
 INSERT INTO dhcpReservations (drMAC,drName,drIP,drCustomArea1) VALUES ('52:54:00:30:28:1e','fog-server','10.0.0.4','#This is a VM.');
 INSERT INTO dhcpReservations (drMAC,drName,drIP,drCustomArea1) VALUES ('52:54:00:7b:37:fb','apache','10.0.0.8','#This is a VM.');
 
+
+INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption1,dcMatchOption2) VALUES ();
