@@ -22,78 +22,89 @@ configureDHCP() {
   
 
 
-            mysql < /root/git/fogproject/lib/common/setupDB.sql
+            
+#-----Begin Temporary Lines-----#
+mysql -s -D fog -e "DROP TABLE dhcpGlobals"
+mysql -s -D fog -e "DROP TABLE dhcpSubnets"
+mysql -s -D fog -e "DROP TABLE dhcpClasses"
+mysql -s -D fog -e "DROP TABLE dhcpFilenames"
+mysql -s -D fog -e "DROP TABLE dhcpReservations"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Restart_Command'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Status_Command'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_To_Use'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Service_Sleep_Time'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Method'"
+#-----End Temporary Lines-----#
 
+            mysql < /var/www/html/fogDHCP/setupDB.sql
+            dhcpDataExists=$(mysql -s -D fog -e "SELECT COUNT(*) FROM globalSettings where settingKey = 'DHCP_Service_Sleep_Time' ")
 
-            mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_To_Use'"
-            mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_To_Use','This specifies the path of the DHCP configuration file on this system. This file is the target of the DHCP updating mechanism.','$dhcptouse','DHCP')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Service_Sleep_Time','This setting controls how often in seconds the DHCP service will check for changes made to DHCP. If changes are found, the dhcp configuration file is updated and a DHCP service restart is attempted.','60','FOG Linux Service Sleep Times');"
 
-
-            mysql -s -D fog -e "TRUNCATE TABLE dhcpGlobals"
-
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_To_Use','This specifies the path of the DHCP configuration file on this system. This file is the target of the DHCP updating mechanism.','$dhcptouse','DHCP')"
 
             dgOption="# DHCP Server Configuration file"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="#see /usr/share/doc/dhcp*/dhcpd.conf.sample"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="# This file was created by FOG"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="#Definition of PXE-specific options"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="# Code 1: Multicast IP Address of bootfile"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] &&mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="# Code 2: UDP Port that client should monitor for MTFTP Responses"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="# Code 3: UDP Port that MTFTP servers are using to listen for MTFTP requests"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="# Code 4: Number of seconds a client must listen for activity before trying"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="#         to start a new MTFTP transfer"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="# Code 5: Number of seconds a client must listen before trying to restart"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="#         a MTFTP transfer"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="option space PXE;"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo $dgOption > $dhcptouse
             dgOption="option PXE.mtftp-ip code 1 = ip-address\;"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo "option PXE.mtftp-ip code 1 = ip-address;" > $dhcptouse
             dgOption="option PXE.mtftp-cport code 2 = unsigned integer 16\;"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo "option PXE.mtftp-cport code 2 = unsigned integer 16;" > $dhcptouse
             dgOption="option PXE.mtftp-sport code 3 = unsigned integer 16\;"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo "option PXE.mtftp-sport code 3 = unsigned integer 16;" > $dhcptouse
             dgOption="option PXE.mtftp-tmout code 4 = unsigned integer 8\;"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo "option PXE.mtftp-tmout code 4 = unsigned integer 8;" > $dhcptouse
             dgOption="option PXE.mtftp-delay code 5 = unsigned integer 8\;"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo "option PXE.mtftp-delay code 5 = unsigned integer 8;" > $dhcptouse
             dgOption="option arch code 93 = unsigned integer 16\;"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo "option arch code 93 = unsigned integer 16;" > $dhcptouse
             dgOption="use-host-decl-names on\;"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo "use-host-decl-names on;" > $dhcptouse
             dgOption="ddns-update-style interim\;"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo "ddns-update-style interim;" > $dhcptouse
             dgOption="ignore client-updates\;"
-            mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
             echo "ignore client-updates;" > $dhcptouse
             
 
@@ -109,16 +120,15 @@ configureDHCP() {
             
             echo "    next-server $ipaddress;" >> "$dhcptouse"
 
-            subnetExists=$(mysql -s -D fog -e "SELECT COUNT(*) FROM dhcpSubnets WHERE dsSubnet = '$network'")
+            if [[ $dhcpDataExists == 0 ]]; then
 
-            if [[ $subnetExists == 0 ]]; then
                 mysql -s -D fog -e "INSERT INTO dhcpSubnets (dsSubnet,dsNetmask,dsOptionSubnetMask,dsRangeDynamicBootpStart,dsRangeDynamicBootpEnd,dsDefaultLeaseTime,dsMaxLeaseTime,dsOptionRouters,dsOptionDomainNameServers,dsNextServer) VALUES ('$network','$submask','$submask','$startrange','$endrange','$defaultLeaseTime','$maxLeaseTime','$routeraddress','$dnsaddress','$ipaddress')"  
 
-		dsID=$(mysql -s -D fog -e "SELECT dsID FROM dhcpSubnets WHERE dsSubnet = '$network'")
+                dsID=$(mysql -s -D fog -e "SELECT dsID FROM dhcpSubnets WHERE dsSubnet = '$network'")
                 dcClass="Legacy"
                 dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00000\"\;"
                 dcMatchOption="filename \"undionly.kkpxe\"\;"
-		mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption1) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
+                mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption1) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
                 dcClass="UEFI-32-2"
                 dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00002\"\;"
                 dcMatchOption="filename \"i386-efi/ipxe.efi\"\;"
@@ -139,9 +149,8 @@ configureDHCP() {
                 dcMatch="match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00009\"\;"
                 dcMatchOption="filename \"ipxe.efi\"\;"
                 mysql -s -D fog -e "INSERT INTO dhcpClasses (dc_dsID,dcClass,dcMatch,dcMatchOption1) VALUES ('$dsID','$dcClass','$dcMatch','$dcMatchOption')"
-            else
-                mysql -s -D fog -e "UPDATE dhcpSubnets SET dsNetmask='$submask', dsOptionSubnetMask='$submask', dsRangeDynamicBootpStart='$startrange', dsRangeDynamicBootpEnd='$endrange', dsDefaultLeaseTime='$defaultLeaseTime', dsMaxLeaseTime='$maxLeaseTime', dsOptionRouters='$routeraddress', dsOptionDomainNameServers='$dnsaddress', dsNextServer='$ipaddress' WHERE dsSubnet='$network'"
             fi
+            
             echo "    class \"Legacy\" {" >> "$dhcptouse"
             echo "        match if substring(option vendor-class-identifier, 0, 20) = \"PXEClient:Arch:00000\";" >> "$dhcptouse"
             echo "        filename \"undionly.kkpxe\";" >> "$dhcptouse"
@@ -169,8 +178,8 @@ configureDHCP() {
             echo "}" >> "$dhcptouse"
             case $systemctl in
                 yes)
-                    mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Restart_Command','This specifies the commands used to restart the DHCP service on this system.','systemctl stop $dhcpd\;sleep 2\;systemctl start $dhcpd','DHCP')"
-                    mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Status_Command','This specifies the command used to get the status of the local DHCP service.','systemctl status $dhcpd','DHCP')"
+                    #Set systemctl type commands as 3.
+                    [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Method','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','3','DHCP')"
                     systemctl enable $dhcpd >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                     systemctl stop $dhcpd >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                     sleep 2
@@ -181,8 +190,8 @@ configureDHCP() {
                 *)
                     case $osid in
                         1)
-                            mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Restart_Commands','This specifies the commands used to restart the DHCP service on this system.','service $dhcpd stop\;sleep 2\;service $dhcpd start','DHCP')"
-                            mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Status_Command','This specifies the command used to get the status of the local DHCP service.','service status $dhcpd','DHCP')"
+                            #Case 1 is set as 1.
+                            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Method','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','1','DHCP')"
                             chkconfig $dhcpd on >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             service $dhcpd stop >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             sleep 2
@@ -191,8 +200,8 @@ configureDHCP() {
                             service status $dhcpd >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             ;;
                         2)
-                            mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Restart_Commands','This specifies the commands used to restart the DHCP service on this system.','/etc/init.d/$dhcpd\;sleep 2\;/etc/init.d/$dhcpd','DHCP')"
-                            mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Status_Command','This specifies the command used to get the status of the local DHCP service.','echo \"DHCP status not available on this system.\"','DHCP')"
+                            #Case 2 is set as 2.
+                            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Method','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','2','DHCP')"
                             sysv-rc-conf $dhcpd on >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             /etc/init.d/$dhcpd stop >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             sleep 2
@@ -204,6 +213,7 @@ configureDHCP() {
             errorStat $?
             ;;
         *)
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Method','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','0','DHCP')"
             echo "Skipped"
             ;;
     esac
