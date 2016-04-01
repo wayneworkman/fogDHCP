@@ -562,7 +562,7 @@ while(1) {
 		}	
 	} else {
 		// Check logging preference and then perform preference.
-		if ($ONLY_LOG_CHANGES != "1") {
+		if ($ONLY_LOG_CHANGES == "0") {
 			WriteLog("The new and current configs are identical.");
 		}
 		unlink($tmpFile);
