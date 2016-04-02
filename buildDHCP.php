@@ -4,18 +4,14 @@ $servername="127.0.0.1";
 $username="root";
 $password="";
 $database="fog";
-$DHCP_SERVICE_SLEEP_TIME=60;
-$DHCP_TO_USE="/etc/dhcp/dhcpd.conf";
+
+
 $Current_DHCP_Checksum="";
 $New_DHCP_Checksum="";
 $New_File="";
 $New_Line="\n";
-$tmpFile = "$DHCP_TO_USE.tmp";
-$log = "/opt/fog/log/fogdhcp.log";
 $TimeZone="UTC";
 date_default_timezone_set($TimeZone);
-$DHCP_METHOD="1";
-$ONLY_LOG_CHANGES="1";
 
 
 //Function to write to the log.
@@ -23,6 +19,9 @@ function WriteLog($Message) {
 	global $log;
 	global $New_Line;
 	$Now=date("[Y-m-d  h:i:sa]");
+	if ($log == "") {
+		$log = "/opt/fog/log/fogdhcp.log";
+	}
 	if (file_exists($log)) {
 		$current = file_get_contents($log);
 		$current .= "$Now  $Message$New_Line";	
@@ -40,10 +39,10 @@ function WriteLog($Message) {
 $link = new mysqli($servername, $username, $password, $database);
 // Check connection
 if ($link->connect_error) {
-        // Couldn't establish a connection with the database.
+	// Couldn't establish a connection with the database.
 	WriteLog("Couldn't establish a connection with the database.");
-        die("Error");
 }
+
 
 
 
@@ -52,6 +51,24 @@ if ($link->connect_error) {
 
 //start loop.
 while(1) {
+
+
+
+	// Make sure the connection is still alive, if not, try to reconnect. DO NOT proceed without a good connection.
+	while(!$link->ping()) {
+		WriteLog("Lost connection to the database. Not doing anything until the connection can be re-established.");
+		//Attempt a re-connect.
+		$link = new mysqli($servername, $username, $password, $database);
+		// Check connection
+		if ($link->connect_error) {
+			WriteLog("Couldn't re-establish a connection with the database.");
+		} else {
+			WriteLog("Connection to the database has been re-established.");
+		}
+		// Give the server breathing room, whether the database is active or not.
+		$DHCP_SERVICE_SLEEP_TIME=60;
+		sleep($DHCP_SERVICE_SLEEP_TIME);
+	}
 
 
 
@@ -70,10 +87,14 @@ while(1) {
 			if ($TimeZone != "" ) {
 				date_default_timezone_set($TimeZone);
 			} else {
+				$TimeZone="UTC";
+				date_default_timezone_set($TimeZone);
 				WriteLog("The FOG_TZ_INFO only has white space in it. Default timezone of \"$TimeZone\" is set.");
 			}
 		}
 	} else {
+		$TimeZone="UTC";
+		date_default_timezone_set($TimeZone);
 		WriteLog("Could not get the FOG_TZ_INFO (timezone) from the globalSettings table. Default timezone of \"$TimeZone\" is set.");
 	}
 	$result->free();
@@ -90,10 +111,12 @@ while(1) {
 			if ($tmp != "") {
 				$DHCP_SERVICE_SLEEP_TIME = $tmp;
 			} else {
+				$DHCP_SERVICE_SLEEP_TIME=60;
 				WriteLog("The DHCP_SERVICE_SLEEP_TIME setting in the globalSettings table only has white space in it. Default sleep time \"$DHCP_SERVICE_SLEEP_TIME\" is set.");
 			}
 		}
 	} else {
+		$DHCP_SERVICE_SLEEP_TIME=60;
 		WriteLog("Could not get the DHCP_SERVICE_SLEEP_TIME from the globalSettings table. Default sleep time \"$DHCP_SERVICE_SLEEP_TIME\" is set.");
 	}
 	$result->free();
@@ -111,10 +134,12 @@ while(1) {
 			if ($tmp != "") {
 				$log = $tmp . "fogdhcp.log";
 			} else {
+				$log = "/opt/fog/log/fogdhcp.log";
 				WriteLog("The SERVICE_LOG_PATH setting in the globalSettings table only has white space in it. Default log \"$log\" is set.");
 			}
 		}
 	} else {
+		$log = "/opt/fog/log/fogdhcp.log";
 		WriteLog("Could not get the SERVICE_LOG_PATH from the globalSettings table. Default log \"$log\" is set.");
 	}
 	$result->free();
@@ -131,11 +156,16 @@ while(1) {
 			$tmp = trim($row["settingValue"]);
 			if ($tmp != "") {
 				$DHCP_TO_USE = $tmp;
+				$tmpFile = "$DHCP_TO_USE.tmp";
 			} else {
+				$DHCP_TO_USE="/etc/dhcp/dhcpd.conf";
+				$tmpFile = "$DHCP_TO_USE.tmp";
 				WriteLog("The DHCP_TO_USE setting in the globalSettings table only has white space in it. Default file \"$DHCP_TO_USE\" is set.");
 			}
 		}
 	} else {
+		$DHCP_TO_USE="/etc/dhcp/dhcpd.conf";
+		$tmpFile = "$DHCP_TO_USE.tmp";
 		WriteLog("Could not get the DHCP_TO_USE from the globalSettings table. Default file \"$DHCP_TO_USE\" is set.");
 	}
 	$result->free();
@@ -153,10 +183,12 @@ while(1) {
 			if ($tmp != "") {
 				$DHCP_METHOD = $tmp;
 			} else {
+				$DHCP_METHOD="1";
 				WriteLog("The DHCP_METHOD setting in the globalSettings table only has white space in it. Default option \"$DHCP_METHOD\" is set.");
 			}
 		}
 	} else {
+		$DHCP_METHOD="1";
 		WriteLog("Could not get the DHCP_METHOD from the globalSettings table. Default option \"$DHCP_METHOD\" is set.");
 	}
 	$result->free();
@@ -174,10 +206,12 @@ while(1) {
 			if ($tmp != "") {
 				$ONLY_LOG_CHANGES = $tmp;
 			} else {
+				$ONLY_LOG_CHANGES="1";
 				WriteLog("The ONLY_LOG_CHANGES setting in the globalSettings table only has white space in it. Default option \"$ONLY_LOG_CHANGES\" is set.");
 			}
 		}
 	} else {
+		$ONLY_LOG_CHANGES="1";
 		WriteLog("Could not get the ONLY_LOG_CHANGES from the globalSettings table. Default option \"$ONLY_LOG_CHANGES\" is set.");
 	}
 	$result->free();
@@ -197,7 +231,7 @@ while(1) {
 			if ($dgOption != "") {
 				$New_File .= "$dgOption$New_Line";
 			} else {
-				WriteLog("The dhcp Global option with ID number \"$tmp\" only has white space.");
+				WriteLog("The dhcp Global option with ID number \"$tmp\" only has white space. This is probably not good.");
 			}
 		}
 	} else {
