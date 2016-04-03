@@ -57,7 +57,7 @@ function RestartDHCP() {
 		WriteLog(shell_exec("service $dhcpd stop;sleep 2;service $dhcpd start;sleep 2;service $dhcpd status;sleep 2"));
 		$dhcpStatus=shell_exec("service $dhcpd status");
 	} else if ($DHCP_METHOD == "2") {
-		WriteLog(shell_exec("service $dhcpd stop;sleep 2;service dhcpd start"));
+		WriteLog(shell_exec("service $dhcpd stop;sleep 2;service $dhcpd start"));
 		$dhcpStatus=$NotAvailable;
 		WriteLog("The DHCP_METHOD is set to \"$DHCP_METHOD\". This means we don't know if DHCP is running properly or not. You should verify if it's OK.");
 	} else if ($DHCP_METHOD == "3") {
@@ -78,8 +78,11 @@ function RestartDHCP() {
 //Function to check DHCP status.
 function CheckDHCP() {
 	global $dhcpStatus;
-	global $$NotAvailable;
+	global $NotAvailable;
 	global $Failed;
+	global $True;
+	global $False;
+	global $ONLY_LOG_CHANGES;
 
 	// Bad status patterns.
 	$bad1="Active: inactive (dead)";
@@ -114,7 +117,6 @@ function CheckDHCP() {
 	} else {
 		$Failed=$True;
 		WriteLog("Could not reliably determine the state of the DHCP service. You should imediately investigate it's status.");
-	}
 	}
 }
 
