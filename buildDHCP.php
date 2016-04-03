@@ -6,21 +6,31 @@ $password="";
 $database="fog";
 
 
-$Current_DHCP_Checksum="";
-$New_DHCP_Checksum="";
-$New_File="";
+$True="True";
+$False="False";
+$LogFileName = "fogdhcp.log";
+$DefaultLogFilePath="/opt/fog/log/"; // Include trailing slash here.
+$dhcpdSetting="dhcpd=";
+$SettingsFile="/opt/fog/.fogsettings";
 $New_Line="\n";
+$NotAvailable="NA";
+$Failed="";
 $TimeZone="UTC";
 date_default_timezone_set($TimeZone);
+
+
+
 
 
 //Function to write to the log.
 function WriteLog($Message) {
 	global $log;
 	global $New_Line;
+	global $DefaultLogFilePath;
+	global $LogFileName;
 	$Now=date("[Y-m-d  h:i:sa]");
 	if ($log == "") {
-		$log = "/opt/fog/log/fogdhcp.log";
+		$log = "$DefaultLogFilePath$LogFileName";
 	}
 	if (file_exists($log)) {
 		$current = file_get_contents($log);
@@ -31,6 +41,71 @@ function WriteLog($Message) {
 	file_put_contents($log, $current);
 }
 
+
+
+
+
+
+
+//Function to restart DHCP.
+function RestartDHCP() {
+	global $DHCP_METHOD;
+	global $dhcpStatus;
+	global $NotAvailable;
+	global $dhcpd;
+	if ($DHCP_METHOD == "1") {
+		WriteLog(shell_exec("service $dhcpd stop;sleep 2;service $dhcpd start;sleep 2;service $dhcpd status;sleep 2"));
+		$dhcpStatus=shell_exec("service $dhcpd status");
+	} else if ($DHCP_METHOD == "2") {
+		WriteLog(shell_exec("service $dhcpd stop;sleep 2;service dhcpd start"));
+		$dhcpStatus=$NotAvailable;
+		WriteLog("The DHCP_METHOD is set to \"$DHCP_METHOD\". This means we don't know if DHCP is running properly or not. You should verify if it's OK.");
+	} else if ($DHCP_METHOD == "3") {
+		WriteLog(shell_exec("systemctl stop $dhcpd;sleep 2;systemctl start $dhcpd;sleep 2;systemctl status $dhcpd;sleep 2"));
+		$dhcpStatus=shell_exec("systemctl status $dhcpd");
+	} else if ($DHCP_METHOD == "0") {
+		WriteLog("The settingKey \"DHCP_METHOD\" in the globalSettings table is set to 0, no interaction with the system's DHCP service will be attempted.");
+		$dhcpStatus=$NotAvailable;
+	} else {
+		WriteLog("The settingKey \"DHCP_METHOD\" in the globalSettings table is set to something that is not supported. It's currently set to \"$DHCP_METHOD\"   Are there typos, white spaces, and/or other odd things?");
+		$dhcpStatus=$NotAvailable;
+	}
+}
+
+
+
+
+//Function to check DHCP status.
+function CheckDHCP() {
+	global $dhcpStatus;
+	global $$NotAvailable;
+	global $Failed;
+
+	// Bad status patterns.
+	$bad1="Active: inactive (dead)";
+	$bad2="Loaded: not-found";
+	$bad3="Active: failed";
+	$bad4="Configuration file errors encountered -- exiting";
+	$bad5="(code=exited, status=1/FAILURE)";
+	$bad6="Failed to start DHCPv4 Server Daemon.";
+
+	// Good status patterns.
+	$good1="Active: active (running)";
+
+
+	//Check for failure/success patterns.
+	if ((strpos($dhcpStatus, $bad1) == true) || (strpos($dhcpStatus, $bad2) == true) || (strpos($dhcpStatus, $bad3) == true) || (strpos($dhcpStatus, $bad4) == true) || (strpos($dhcpStatus, $bad5) == true) || (strpos($dhcpStatus, $bad6) == true)) {
+		//DHCP status is bad.
+		$Failed=$True;
+		WriteLog("Detected a DHCP service failure!");
+	} else if ((strpos($dhcpStatus, $good1) == false) && (strpos($dhcpStatus, $NotAvailable) == false)) {
+		//DHCP status is good.
+		$Failed=$False;
+		if ($ONLY_LOG_CHANGES == "0") {
+			WriteLog("Detected that the DHCP service is running without error.");
+		}
+	}
+}
 
 
 
@@ -78,6 +153,29 @@ while(1) {
 
 
 
+	//Read dhcpd setting type from settings file.
+	if (file_exists($SettingsFile) && ($myfile = fopen($SettingsFile, "r")!==false)) {
+		$myfile = fopen($SettingsFile, "r");
+		$SettingsContent = fread($myfile,filesize($SettingsFile));
+		fclose($myfile);
+		//get position of dhcpd setting, and set the offset, then get the value.
+		$FirstCharacterPosition = (strpos($SettingsContent, $dhcpdSetting) + 7);
+		$EnclosingCharacter =  $SettingsContent{($FirstCharacterPosition - 1)};
+		$LastCharacterPosition = strpos($SettingsContent, $EnclosingCharacter, $FirstCharacterPosition);
+		$dhcpd = trim(substr($SettingsContent, $FirstCharacterPosition, ($LastCharacterPosition - $FirstCharacterPosition)));
+		if ($dhcpd == "") {
+			$dhcpd = "dhcpd";
+			WriteLog("The setting \"$dhcpdSetting\" inside the file \"$SettingsFile\" was not read correctly. For now, the dhcpd type has been set to \"$dhcpd\".");
+		}
+	} else {
+		$dhcpd="dhcpd";
+		WriteLog("The settings file \"$SettingsFile\" either wasn't found or couldn't be opened. It might not be there, or something else like permissions or SELinux may be blocking it from being detected or opened. You should investigate. For now, the dhcpd type has been set to \"$dhcpd\".");
+	}
+
+
+
+
+
 	//Get the timezone.
 	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'FOG_TZ_INFO' LIMIT 1";
 	$result = $link->query($sql);
@@ -89,13 +187,13 @@ while(1) {
 			} else {
 				$TimeZone="UTC";
 				date_default_timezone_set($TimeZone);
-				WriteLog("The FOG_TZ_INFO only has white space in it. Default timezone of \"$TimeZone\" is set.");
+				WriteLog("The FOG_TZ_INFO setting inside of the globalSettings table only has white space in it. Default timezone of \"$TimeZone\" is set.");
 			}
 		}
 	} else {
 		$TimeZone="UTC";
 		date_default_timezone_set($TimeZone);
-		WriteLog("Could not get the FOG_TZ_INFO (timezone) from the globalSettings table. Default timezone of \"$TimeZone\" is set.");
+		WriteLog("Could not get the FOG_TZ_INFO setting from the globalSettings table. Default timezone of \"$TimeZone\" is set.");
 	}
 	$result->free();
 
@@ -132,14 +230,14 @@ while(1) {
 		while($row = $result->fetch_assoc()) {
 			$tmp = trim($row["settingValue"]);
 			if ($tmp != "") {
-				$log = $tmp . "fogdhcp.log";
+				$log = $tmp . $LogFileName;
 			} else {
-				$log = "/opt/fog/log/fogdhcp.log";
+				$log = "$DefaultLogFilePath$LogFileName";
 				WriteLog("The SERVICE_LOG_PATH setting in the globalSettings table only has white space in it. Default log \"$log\" is set.");
 			}
 		}
 	} else {
-		$log = "/opt/fog/log/fogdhcp.log";
+		$log = "$DefaultLogFilePath$LogFileName";
 		WriteLog("Could not get the SERVICE_LOG_PATH from the globalSettings table. Default log \"$log\" is set.");
 	}
 	$result->free();
@@ -183,12 +281,12 @@ while(1) {
 			if ($tmp != "") {
 				$DHCP_METHOD = $tmp;
 			} else {
-				$DHCP_METHOD="1";
+				$DHCP_METHOD="3";
 				WriteLog("The DHCP_METHOD setting in the globalSettings table only has white space in it. Default option \"$DHCP_METHOD\" is set.");
 			}
 		}
 	} else {
-		$DHCP_METHOD="1";
+		$DHCP_METHOD="3";
 		WriteLog("Could not get the DHCP_METHOD from the globalSettings table. Default option \"$DHCP_METHOD\" is set.");
 	}
 	$result->free();
@@ -231,11 +329,13 @@ while(1) {
 			if ($dgOption != "") {
 				$New_File .= "$dgOption$New_Line";
 			} else {
-				WriteLog("The dhcp Global option with ID number \"$tmp\" only has white space. This is probably not good.");
+				WriteLog("The dhcp Global option with ID number \"$tmp\" only has white space. Skipping this global setting.");
 			}
 		}
 	} else {
-		WriteLog("No global DHCP options could be found in the dhcpGlobals table. This is probably not good.");
+		if ($ONLY_LOG_CHANGES == "0") {
+			WriteLog("No global DHCP options could be found in the dhcpGlobals table. This is probably not good.");
+		}
 	}
 	$result->free();
 
@@ -577,16 +677,39 @@ while(1) {
 				} else {
 					WriteLog("Moving the files succeeded, attempting to restart the DHCP service.");
 					//Restart the service here.
-					if ($DHCP_METHOD == "1") {
-						WriteLog(shell_exec('service dhcpd stop;sleep 2;service dhcpd start;sleep 2;service dhcpd status'));
-					} else if ($DHCP_METHOD == "2") {
-						WriteLog(shell_exec('service dhcpd stop;sleep 2;service dhcpd start'));
-					} else if ($DHCP_METHOD == "3") {
-						WriteLog(shell_exec('systemctl stop dhcpd;sleep 2;systemctl start dhcpd;sleep 2;systemctl status dhcpd'));
-					} else if ($DHCP_METHOD == "0") {
-						WriteLog("The settingKey \"DHCP_METHOD\" in the globalSettings table is set to 0, no interaction with the system's DHCP service will be attempted.");
+					RestartDHCP();
+
+					//Here, attempt to check the status of DHCP.
+					CheckDHCP();
+
+					//Check for failure/success.
+					if ($Failed=$True) {
+						//Restarting DHCP failed.
+						//Restore old dhcp config file and try to restart the service again.
+						if ((file_exists($DHCP_TO_USE)) && (file_exists("$DHCP_TO_USE.old"))) {
+							WriteLog("Attempting to move the newly made bad configuration \"$DHCP_TO_USE\" to \"$DHCP_TO_USE.broke\" and attempting to move \"$DHCP_TO_USE.old\" in place as the current DHCP file.");
+							// Move the newly made file.
+							rename($DHCP_TO_USE, "$DHCP_TO_USE.broke");
+							// Copy old to current.
+							copy("$DHCP_TO_USE.old", $DHCP_TO_USE);
+							if (file_exists($DHCP_TO_USE)) {
+								WriteLog("Moving \"$DHCP_TO_USE.old\" to \"$DHCP_TO_USE\" seems to have succeeded. Attempting to restart the DHCP service now.");
+								// Attempt to restart service one last time.
+								RestartDHCP();
+								CheckDHCP();
+								if ($Failed=$True) {
+									WriteLog("It seems that either the old config file was bad too, or there are larger problems. Efforts to restore DHCP services have failed. You need to take imediate action to restore them.");
+								} else {
+									WriteLog("It seems that efforts to restore DHCP services from the old file have succeeded. You should investigate what is wrong with your configuration.");
+									$DHCP_SERVICE_SLEEP_TIME = 3600;
+									WriteLog("DHCP_SERVICE_SLEEP_TIME has been set to \"$DHCP_SERVICE_SLEEP_TIME\" due to the recent failure in an effort to minimize interruptions. If you'd like this service to attempt to rebuild the DHCP config file and attempt a restart before then, you'll need to restart the service manually.");
+								}
+							}
+						} else {
+							WriteLog("The DHCP service has failed, and for some reason, there is no \"$DHCP_TO_USE.old\" to try to restore, or the actual DHCP configuration file \"$DHCP_TO_USE\" does not exist which would be very strange because it was earlier verified as having been moved successfully. You need to immediately investigate the cause of the failure and find a solution. It could be something as simple as a typo in your configuration, or someone has removed the backup dhcp file, or somehow deleted the current dhcp file with impeccable timing.");
+						}
 					} else {
-						WriteLog("The settingKey \"DHCP_METHOD\" in the globalSettings table is set to something that is not supported. Check for typos, white spaces, and other odd things.");
+						WriteLog("Restarting DHCP service seems to have succeeded.");
 					}
 				}
 			} else {

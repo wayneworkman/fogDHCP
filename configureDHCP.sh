@@ -34,14 +34,17 @@ mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Status_C
 mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_To_Use'"
 mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Service_Sleep_Time'"
 mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Method'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'ONLY_LOG_CHANGES'"
 #-----End Temporary Lines-----#
 
             mysql < /var/www/html/fogDHCP/setupDB.sql
             dhcpDataExists=$(mysql -s -D fog -e "SELECT COUNT(*) FROM globalSettings where settingKey = 'DHCP_Service_Sleep_Time' ")
 
-            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Service_Sleep_Time','This setting controls how often in seconds the DHCP service will check for changes made to DHCP. If changes are found, the dhcp configuration file is updated and a DHCP service restart is attempted.','60','FOG Linux Service Sleep Times');"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_SERVICE_SLEEP_TIME','This setting controls how often in seconds the DHCP service will check for changes made to DHCP. If changes are found, the dhcp configuration file is updated and a DHCP service restart is attempted.','60','FOG Linux Service Sleep Times');"
 
-            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_To_Use','This specifies the path of the DHCP configuration file on this system. This file is the target of the DHCP updating mechanism.','$dhcptouse','DHCP')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_TO_USE','This specifies the path of the DHCP configuration file on this system. This file is the target of the DHCP updating mechanism.','$dhcptouse','DHCP')"
+
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('ONLY_LOG_CHANGES','This setting is to prevent the fog dhcp service log from becoming very large. When this is enabled (1), only changes and errors are logged. If this is disabled, a log message saying everything is fine is written with every service iteration.','1','DHCP')"
 
             dgOption="# DHCP Server Configuration file"
             [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO dhcpGlobals (dgOption) VALUES ('$dgOption')"
@@ -179,7 +182,7 @@ mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Method'"
             case $systemctl in
                 yes)
                     #Set systemctl type commands as 3.
-                    [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Method','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','3','DHCP')"
+                    [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_METHOD','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','3','DHCP')"
                     systemctl enable $dhcpd >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                     systemctl stop $dhcpd >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                     sleep 2
@@ -191,7 +194,7 @@ mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Method'"
                     case $osid in
                         1)
                             #Case 1 is set as 1.
-                            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Method','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','1','DHCP')"
+                            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_METHOD','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','1','DHCP')"
                             chkconfig $dhcpd on >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             service $dhcpd stop >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             sleep 2
@@ -201,7 +204,7 @@ mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Method'"
                             ;;
                         2)
                             #Case 2 is set as 2.
-                            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Method','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','2','DHCP')"
+                            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_METHOD','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','2','DHCP')"
                             sysv-rc-conf $dhcpd on >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             /etc/init.d/$dhcpd stop >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             sleep 2
@@ -213,7 +216,7 @@ mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Method'"
             errorStat $?
             ;;
         *)
-            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_Method','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','0','DHCP')"
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_METHOD','This determines what commands are issued for restarting DHCP and checking the service. Options are 0 for nothing, 1, 2, and 3. The only reason for changing this value is if the FOG DB is imported into a different OS.','0','DHCP')"
             echo "Skipped"
             ;;
     esac
