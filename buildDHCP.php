@@ -88,22 +88,33 @@ function CheckDHCP() {
 	$bad4="Configuration file errors encountered -- exiting";
 	$bad5="(code=exited, status=1/FAILURE)";
 	$bad6="Failed to start DHCPv4 Server Daemon.";
+	$bad7="stop/waiting";
 
 	// Good status patterns.
 	$good1="Active: active (running)";
-
+	$good2="start/running";
 
 	//Check for failure/success patterns.
-	if ((strpos($dhcpStatus, $bad1) == true) || (strpos($dhcpStatus, $bad2) == true) || (strpos($dhcpStatus, $bad3) == true) || (strpos($dhcpStatus, $bad4) == true) || (strpos($dhcpStatus, $bad5) == true) || (strpos($dhcpStatus, $bad6) == true)) {
+	if ((strpos($dhcpStatus, $bad1) == true) || (strpos($dhcpStatus, $bad2) == true) || (strpos($dhcpStatus, $bad3) == true) || (strpos($dhcpStatus, $bad4) == true) || (strpos($dhcpStatus, $bad5) == true) || (strpos($dhcpStatus, $bad6) == true) || (strpos($dhcpStatus, $bad7) == true)) {
 		//DHCP status is bad.
 		$Failed=$True;
 		WriteLog("Detected a DHCP service failure!");
-	} else if ((strpos($dhcpStatus, $good1) == false) && (strpos($dhcpStatus, $NotAvailable) == false)) {
+
+	} else if (((strpos($dhcpStatus, $good1) == true) || (strpos($dhcpStatus, $good2) == true)) && ($dhcpStatus != $NotAvailable)) {
 		//DHCP status is good.
 		$Failed=$False;
 		if ($ONLY_LOG_CHANGES == "0") {
 			WriteLog("Detected that the DHCP service is running without error.");
 		}
+	} else if ($dhcpStatus == $NotAvailable) {
+		$Failed=$False;
+		if ($ONLY_LOG_CHANGES == "0") {
+			WriteLog("The DHCP service status is not available. This may be due to OS type, or a request to not bother the DHCP servie.");
+		}
+	} else {
+		$Failed=$True;
+		WriteLog("Could not reliably determine the state of the DHCP service. You should imediately investigate it's status.");
+	}
 	}
 }
 
