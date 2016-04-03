@@ -37,7 +37,7 @@ mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Method'"
 mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'ONLY_LOG_CHANGES'"
 #-----End Temporary Lines-----#
 
-            mysql < /var/www/html/fogDHCP/setupDB.sql
+            mysql < /root/fogDHCP/setupDB.sql
             dhcpDataExists=$(mysql -s -D fog -e "SELECT COUNT(*) FROM globalSettings where settingKey = 'DHCP_Service_Sleep_Time' ")
 
             [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_SERVICE_SLEEP_TIME','This setting controls how often in seconds the DHCP service will check for changes made to DHCP. If changes are found, the dhcp configuration file is updated and a DHCP service restart is attempted.','60','FOG Linux Service Sleep Times');"
