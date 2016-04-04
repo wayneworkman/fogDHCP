@@ -159,7 +159,7 @@ while(1) {
 	}
 
 
-
+	
 
 	//Clear out the contents of the New_File variable.
 	$New_File = "";
@@ -725,8 +725,6 @@ while(1) {
 						} else {
 							WriteLog("The DHCP service has failed, and for some reason, there is no \"$DHCP_TO_USE.old\" to try to restore. You need to immediately investigate the cause of the failure and find a solution. It could be something as simple as a typo in your configuration, or someone has removed the backup dhcp file, or something else as well.");
 						}
-					} else {
-						WriteLog("Restarting DHCP service seems to have succeeded.");
 					}
 				}
 			} else {
