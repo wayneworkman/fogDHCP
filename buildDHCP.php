@@ -190,7 +190,7 @@ while(1) {
 
 
 	//Get the timezone.
-	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'FOG_TZ_INFO' LIMIT 1";
+	$sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey` = 'FOG_TZ_INFO' LIMIT 1";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
@@ -214,7 +214,7 @@ while(1) {
 
 
 	//Get sleep time.
-	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_SERVICE_SLEEP_TIME' LIMIT 1";
+	$sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey` = 'DHCP_SERVICE_SLEEP_TIME' LIMIT 1";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
@@ -237,7 +237,7 @@ while(1) {
 
 
 	//Get the logs path.
-	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'SERVICE_LOG_PATH' LIMIT 1";
+	$sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey` = 'SERVICE_LOG_PATH' LIMIT 1";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
@@ -260,7 +260,7 @@ while(1) {
 
 
 	//Get DHCP Config file.
-	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_TO_USE' LIMIT 1";
+	$sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey` = 'DHCP_TO_USE' LIMIT 1";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
@@ -286,7 +286,7 @@ while(1) {
 
 
 	// Get DHCP Method.
-	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'DHCP_METHOD' LIMIT 1";
+	$sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey` = 'DHCP_METHOD' LIMIT 1";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
@@ -309,7 +309,7 @@ while(1) {
 
 
 	// Get Logging Preference.
-	$sql = "SELECT settingValue FROM globalSettings WHERE settingKey = 'ONLY_LOG_CHANGES' LIMIT 1";
+	$sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey` = 'ONLY_LOG_CHANGES' LIMIT 1";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
@@ -333,7 +333,7 @@ while(1) {
 
 
 	//Build Global Options into file.
-	$sql = "SELECT dgOption,dgID FROM dhcpGlobals ORDER BY dgID ASC";
+	$sql = "SELECT `dgOption`,`dgID` FROM `dhcpGlobals` ORDER BY `dgID` ASC";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
@@ -360,7 +360,7 @@ while(1) {
 
 
 	//Build global classes. All classes with a dc_dsID greater than one-million are global.   
-	$sql = "SELECT * FROM dhcpClasses WHERE dc_dsID = 2000000 ORDER BY dcID ASC";
+	$sql = "SELECT * FROM `dhcpClasses` WHERE `dc_dsID` = 2000000 ORDER BY `dcID` ASC";
 	$result2 = $link->query($sql);
 		if ($result2->num_rows > 0) {
 			while($row2 = $result2->fetch_assoc()) {
@@ -402,7 +402,7 @@ while(1) {
 
 
 	//Build Subnets.
-	$sql = "SELECT * FROM dhcpSubnets ORDER BY dsID ASC";
+	$sql = "SELECT * FROM `dhcpSubnets` ORDER BY `dsID` ASC";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
@@ -471,7 +471,7 @@ while(1) {
 
 
 			//Build classes for this subnet.	
-			$sql = "SELECT * FROM dhcpClasses WHERE dc_dsID = $dsID ORDER BY dcID ASC";
+			$sql = "SELECT * FROM `dhcpClasses` WHERE `dc_dsID` = $dsID ORDER BY `dcID` ASC";
         		$result2 = $link->query($sql);
         		if ($result2->num_rows > 0) {
 				while($row2 = $result2->fetch_assoc()) {
@@ -510,7 +510,7 @@ while(1) {
 
 
 			//Build DHCP Reservations for this subnet.
-			$sql = "SELECT * FROM dhcpReservations WHERE dr_dsID = $dsID ORDER BY drID ASC";
+			$sql = "SELECT * FROM `dhcpReservations` WHERE `dr_dsID` = $dsID ORDER BY `drID` ASC";
 			$result3 = $link->query($sql);
 			if ($result3->num_rows > 0) {
 				while($row3 = $result3->fetch_assoc()) {
@@ -568,7 +568,7 @@ while(1) {
 
 
 	//Build Global Reservations.
-	$sql = "SELECT * FROM dhcpReservations WHERE dr_dsID = 2000000 ORDER BY drID ASC";
+	$sql = "SELECT * FROM `dhcpReservations` WHERE `dr_dsID` = 2000000 ORDER BY `drID` ASC";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
