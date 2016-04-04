@@ -110,7 +110,7 @@ function CheckDHCP() {
 			WriteLog("Detected that the DHCP service is running without error.");
 		}
 	} else if ($dhcpStatus == $NotAvailable) {
-		$Failed=$False;
+		$Failed=$NotAvailable;
 		if ($ONLY_LOG_CHANGES == "0") {
 			WriteLog("The DHCP service status is not available. This may be due to OS type, or a request to not bother the DHCP servie.");
 		}
@@ -699,7 +699,7 @@ while(1) {
 					if ($Failed=$True) {
 						//Restarting DHCP failed.
 						//Restore old dhcp config file and try to restart the service again.
-						if ((file_exists($DHCP_TO_USE)) && (file_exists("$DHCP_TO_USE.old"))) {
+						if (file_exists("$DHCP_TO_USE.old")) {
 							WriteLog("Attempting to move the newly made bad configuration \"$DHCP_TO_USE\" to \"$DHCP_TO_USE.broke\" and attempting to move \"$DHCP_TO_USE.old\" in place as the current DHCP file.");
 							// Move the newly made file.
 							rename($DHCP_TO_USE, "$DHCP_TO_USE.broke");
@@ -719,7 +719,7 @@ while(1) {
 								}
 							}
 						} else {
-							WriteLog("The DHCP service has failed, and for some reason, there is no \"$DHCP_TO_USE.old\" to try to restore, or the actual DHCP configuration file \"$DHCP_TO_USE\" does not exist which would be very strange because it was earlier verified as having been moved successfully. You need to immediately investigate the cause of the failure and find a solution. It could be something as simple as a typo in your configuration, or someone has removed the backup dhcp file, or somehow deleted the current dhcp file with impeccable timing.");
+							WriteLog("The DHCP service has failed, and for some reason, there is no \"$DHCP_TO_USE.old\" to try to restore. You need to immediately investigate the cause of the failure and find a solution. It could be something as simple as a typo in your configuration, or someone has removed the backup dhcp file, or something else as well.");
 						}
 					} else {
 						WriteLog("Restarting DHCP service seems to have succeeded.");
