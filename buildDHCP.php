@@ -696,13 +696,17 @@ while(1) {
 					CheckDHCP();
 
 					//Check for failure/success.
-					if ($Failed=$True) {
+					if ($Failed == $True) {
 						//Restarting DHCP failed.
 						//Restore old dhcp config file and try to restart the service again.
 						if (file_exists("$DHCP_TO_USE.old")) {
 							WriteLog("Attempting to move the newly made bad configuration \"$DHCP_TO_USE\" to \"$DHCP_TO_USE.broke\" and attempting to move \"$DHCP_TO_USE.old\" in place as the current DHCP file.");
 							// Move the newly made file.
-							rename($DHCP_TO_USE, "$DHCP_TO_USE.broke");
+							if (file_exists($DHCP_TO_USE)) {
+								rename($DHCP_TO_USE, "$DHCP_TO_USE.broke");
+							} else {
+								WriteLog("The newly created dhcp file could not be found, that's not good. Continuing efforts to restore DHCP services.");
+							}
 							// Copy old to current.
 							copy("$DHCP_TO_USE.old", $DHCP_TO_USE);
 							if (file_exists($DHCP_TO_USE)) {
@@ -710,7 +714,7 @@ while(1) {
 								// Attempt to restart service one last time.
 								RestartDHCP();
 								CheckDHCP();
-								if ($Failed=$True) {
+								if ($Failed == $True) {
 									WriteLog("It seems that either the old config file was bad too, or there are larger problems. Efforts to restore DHCP services have failed. You need to take imediate action to restore them.");
 								} else {
 									WriteLog("It seems that efforts to restore DHCP services from the old file have succeeded. You should investigate what is wrong with your configuration.");
