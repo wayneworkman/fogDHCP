@@ -700,17 +700,17 @@ while(1) {
 						//Restarting DHCP failed.
 						//Restore old dhcp config file and try to restart the service again.
 						if (file_exists("$DHCP_TO_USE.old")) {
-							WriteLog("Attempting to move the newly made bad configuration \"$DHCP_TO_USE\" to \"$DHCP_TO_USE.broke\" and attempting to move \"$DHCP_TO_USE.old\" in place as the current DHCP file.");
+							WriteLog("Attempting to move the newly made bad configuration \"$DHCP_TO_USE\" to \"$DHCP_TO_USE.broke\" and attempting to move \"$DHCP_TO_USE.good\" in place as the current DHCP file.");
 							// Move the newly made file.
 							if (file_exists($DHCP_TO_USE)) {
 								rename($DHCP_TO_USE, "$DHCP_TO_USE.broke");
 							} else {
 								WriteLog("The newly created dhcp file could not be found, that's not good. Continuing efforts to restore DHCP services.");
 							}
-							// Copy old to current.
-							copy("$DHCP_TO_USE.old", $DHCP_TO_USE);
+							// Copy good to current.
+							copy("$DHCP_TO_USE.good", $DHCP_TO_USE);
 							if (file_exists($DHCP_TO_USE)) {
-								WriteLog("Moving \"$DHCP_TO_USE.old\" to \"$DHCP_TO_USE\" seems to have succeeded. Attempting to restart the DHCP service now.");
+								WriteLog("Moving \"$DHCP_TO_USE.good\" to \"$DHCP_TO_USE\" seems to have succeeded. Attempting to restart the DHCP service now.");
 								// Attempt to restart service one last time.
 								RestartDHCP();
 								CheckDHCP();
@@ -725,6 +725,9 @@ while(1) {
 						} else {
 							WriteLog("The DHCP service has failed, and for some reason, there is no \"$DHCP_TO_USE.old\" to try to restore. You need to immediately investigate the cause of the failure and find a solution. It could be something as simple as a typo in your configuration, or someone has removed the backup dhcp file, or something else as well.");
 						}
+					} else {
+						WriteLog("Making a copy of the current DHCP configuration to \"$DHCP_TO_USE.good\" as a point to revert to if a future configuration fails." );
+						copy($DHCP_TO_USE, "$DHCP_TO_USE.good");
 					}
 				}
 			} else {
