@@ -686,7 +686,7 @@ while(1) {
 				if ($Current_DHCP_Checksum != $New_DHCP_Checksum) {
 					WriteLog("The new DHCP file was moved to \"$DHCP_TO_USE\" but for some reason the move did not complete correctly, because the new checksum for the newly placed file does not match what it was before the move happened. You should investigate. For now, we will try to move the broken file to \"$DHCP_TO_USE.broke\" for you to look at and move the \"$DHCP_TO_USE.old\" back into place.");
 					rename($DHCP_TO_USE, "$DHCP_TO_USE.broke");
-					rename("$DHCP_TO_USE.old", $DHCP_TO_USE);
+					copy("$DHCP_TO_USE.old", $DHCP_TO_USE);
 				} else {
 					WriteLog("Moving the files succeeded, attempting to restart the DHCP service.");
 					//Restart the service here.
@@ -698,11 +698,14 @@ while(1) {
 					//Check for failure/success.
 					if ($Failed == $True) {
 						//Restarting DHCP failed.
-						//Restore old dhcp config file and try to restart the service again.
-						if (file_exists("$DHCP_TO_USE.old")) {
+						//Restore good dhcp config file and try to restart the service again.
+						if (file_exists("$DHCP_TO_USE.good")) {
 							WriteLog("Attempting to move the newly made bad configuration \"$DHCP_TO_USE\" to \"$DHCP_TO_USE.broke\" and attempting to move \"$DHCP_TO_USE.good\" in place as the current DHCP file.");
 							// Move the newly made file.
 							if (file_exists($DHCP_TO_USE)) {
+								if (file_exists("$DHCP_TO_USE.broke")) {
+									unlink("$DHCP_TO_USE.broke");
+								}
 								rename($DHCP_TO_USE, "$DHCP_TO_USE.broke");
 							} else {
 								WriteLog("The newly created dhcp file could not be found, that's not good. Continuing efforts to restore DHCP services.");
@@ -727,6 +730,9 @@ while(1) {
 						}
 					} else {
 						WriteLog("Making a copy of the current DHCP configuration to \"$DHCP_TO_USE.good\" as a point to revert to if a future configuration fails." );
+						if (file_exists("$DHCP_TO_USE.good")) {
+							unlink("$DHCP_TO_USE.good");
+						}
 						copy($DHCP_TO_USE, "$DHCP_TO_USE.good");
 					}
 				}
