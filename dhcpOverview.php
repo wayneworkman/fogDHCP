@@ -52,16 +52,13 @@ if ($result->num_rows > 0) {
 	echo "There are no $globalText options defined.<br>";
 }
 $result->free();
-echo "<form action=\"$formAction\" method=\"post\">";
-echo "New $globalText option:<br>";
-echo "<input type=\"hidden\" name=\"type\" value=\"$newGlobalOption\"><input type=\"text\" name=\"globalOption\" value=\"\">  <input type=\"submit\" value=\"Submit\"><br>";
-echo "</form>";
 echo "</div>";
 
 
+
+
+
 echo "<br><br>";
-
-
 
 
 
@@ -127,35 +124,10 @@ $result->free();
 echo "</div>";
 
 
-echo "<br><br>";
-
-// New class
-echo "<div>";
-echo "New Class:";
-echo "<form action=\"$formAction\" method=\"post\">";
-echo "<input type=\"hidden\" name=\"type\" value=\"$newClass\">";
-echo "class \"<input type=\"text\" name=\"dcClass\" value=\"\">\" {<br>";
-echo "$tab Match: <input type=\"text\" name=\"dcMatch\" value=\"\"><br>";
-echo "$tab Match Option 1: <input type=\"text\" name=\"dcMatchOption1\" value=\"\"><br>";
-echo "$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"\"><br>";
-echo "$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"\"><br>";
-echo "}<br>";
-echo "$globalText or $subnetText: <select name=\"dc_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
-if ($subnetsExist = "1") {
-	$i = 0;
-	foreach ($dsIDs as $dsID) {
-		echo "<option value=\"$dsID\">$subnetText $dsSubnets[$i] $maskText $dsNetmasks[$i]</option>";
-		$i = $i + 1;
-	}
-}
-echo "</select><br>";
-echo "<input type=\"submit\" value=\"Submit\"><br>";
-echo "</form>";
-echo "</div>";
-
 
 
 echo "<br><br>";
+
 
 
 
@@ -301,43 +273,12 @@ echo "</div>";
 
 
 
-echo "<br><br>";
-
-
-
-
-
-// New subnet
-echo "<div>";
-echo "<form action=\"$formAction\" method=\"post\">";
-echo "<br>";
-echo "<input type=\"hidden\" name=\"type\" value=\"$newSubnet\">";
-echo "$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"\"> $maskText <input type=\"text\" name=\"dsNetMask\" value=\"\"> {<br>";
-echo "$tab option subnet-mask <input type=\"text\" name=\"dsNetMask\" value=\"\">;<br>";
-echo "$tab range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"\">;<br>";
-echo "$tab default-lease-time <input type=\"text\" name=\"dsDefaultLeaseTime\" value=\"\">;<br>";
-echo "$tab max-lease-time <input type=\"text\" name=\"dsMaxLeaseTime\" value=\"\">;<br>";
-echo "$tab option routers <input type=\"text\" name=\"dsOptionRouters\" value=\"\">;<br>";
-echo "$tab option domain-name-servers <input type=\"text\" name=\"dsOptionDomainNameServers\" value=\"\">;<br>";
-echo "$tab option ntp-servers <input type=\"text\" name=\"dsOptionNtpServers\" value=\"\">;<br>";
-echo "$tab next-server <input type=\"text\" name=\"dsNextServer\" value=\"\">;<br>";
-echo "$tab Custom Area 1: <input type=\"text\" name=\"dsCustomArea1\" value=\"\"><br>";
-echo "$tab Custom Area 2: <input type=\"text\" name=\"dsCustomArea2\" value=\"\"><br>";
-echo "$tab Custom Area 3: <input type=\"text\" name=\"dsCustomArea3\" value=\"\"><br>";
-echo "<input type=\"submit\" value=\"Submit\"><br>";
-echo "</form>";
-echo "</div>";
-
-
-
-
-
-
-
 
 
 
 echo "<br><br>";
+
+
 
 
 
@@ -388,6 +329,120 @@ if ($result->num_rows > 0) {
 }
 echo "</div>";
 
+
+
+
+
+echo "<br><br>";
+
+
+
+
+echo "<div>";
+echo "<form action=\"$formAction\" method=\"post\">";
+echo "New $globalText option:<br>";
+echo "<input type=\"hidden\" name=\"type\" value=\"$newGlobalOption\"><input type=\"text\" name=\"globalOption\" value=\"\">  <input type=\"submit\" value=\"Submit\"><br>";
+echo "</form>";
+echo "</div>";
+
+
+
+echo "<br><br>";
+
+
+
+
+// New class
+echo "<div>";
+echo "<form action=\"$formAction\" method=\"post\">";
+echo "New Class:<br>";
+echo "<input type=\"hidden\" name=\"type\" value=\"$newClass\">";
+echo "class \"<input type=\"text\" name=\"dcClass\" value=\"\">\" {<br>";
+echo "$tab Match: <input type=\"text\" name=\"dcMatch\" value=\"\"><br>";
+echo "$tab Match Option 1: <input type=\"text\" name=\"dcMatchOption1\" value=\"\"><br>";
+echo "$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"\"><br>";
+echo "$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"\"><br>";
+echo "}<br>";
+echo "$globalText or $subnetText: <select name=\"dc_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
+if ($subnetsExist = "1") {
+	$i = 0;
+	foreach ($dsIDs as $dsID) {
+		echo "<option value=\"$dsID\">$subnetText $dsSubnets[$i] $maskText $dsNetmasks[$i]</option>";
+		$i = $i + 1;
+	}
+}
+echo "</select><br>";
+echo "<input type=\"submit\" value=\"Submit\"><br>";
+echo "</form>";
+echo "</div>";
+
+
+
+
+echo "<br><br>";
+
+
+
+
+// New subnet
+echo "<div>";
+echo "New $subnetText:";
+echo "<form action=\"$formAction\" method=\"post\">";
+echo "<br>";
+echo "<input type=\"hidden\" name=\"type\" value=\"$newSubnet\">";
+echo "$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"\"> $maskText <input type=\"text\" name=\"dsNetMask\" value=\"\"> {<br>";
+echo "$tab option subnet-mask <input type=\"text\" name=\"dsNetMask\" value=\"\">;<br>";
+echo "$tab range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"\">;<br>";
+echo "$tab default-lease-time <input type=\"text\" name=\"dsDefaultLeaseTime\" value=\"\">;<br>";
+echo "$tab max-lease-time <input type=\"text\" name=\"dsMaxLeaseTime\" value=\"\">;<br>";
+echo "$tab option routers <input type=\"text\" name=\"dsOptionRouters\" value=\"\">;<br>";
+echo "$tab option domain-name-servers <input type=\"text\" name=\"dsOptionDomainNameServers\" value=\"\">;<br>";
+echo "$tab option ntp-servers <input type=\"text\" name=\"dsOptionNtpServers\" value=\"\">;<br>";
+echo "$tab next-server <input type=\"text\" name=\"dsNextServer\" value=\"\">;<br>";
+echo "$tab Custom Area 1: <input type=\"text\" name=\"dsCustomArea1\" value=\"\"><br>";
+echo "$tab Custom Area 2: <input type=\"text\" name=\"dsCustomArea2\" value=\"\"><br>";
+echo "$tab Custom Area 3: <input type=\"text\" name=\"dsCustomArea3\" value=\"\"><br>";
+echo "}<br>";
+echo "<input type=\"submit\" value=\"Submit\"><br>";
+echo "</form>";
+echo "</div>";
+
+
+
+
+
+echo "<br><br>";
+
+
+
+
+// New DHCP Reservation
+echo "<div>";
+echo "New reservation:";
+echo "<form action=\"$formAction\" method=\"post\">";
+echo "<br>";
+echo "<input type=\"hidden\" name=\"type\" value=\"$newReservation\">";
+echo "host <input type=\"text\" name=\"drName\" value=\"\"> {<br>";
+echo "$tab hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"\">;<br>";
+echo "$tab fixed-address <input type=\"text\" name=\"drIP\" value=\"\">;<br>";
+echo "$tab filename \"<input type=\"text\" name=\"drFilename\" value=\"\">\";<br>";
+echo "$tab option domain-name-servers <input type=\"text\" name=\"drOptionDomainNameServers\" value=\"\">;<br>";
+echo "$tab Custom Area 1 <input type=\"text\" name=\"drCustomArea1\" value=\"\"><br>";
+echo "$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"\"><br>";
+echo "$tab Custom Area 3 <input type=\"text\" name=\"drCustomArea3\" value=\"\"><br>";
+echo "}<br>";
+echo "$globalText or $subnetText: <select name=\"dr_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
+if ($subnetsExist = "1") {
+	$i = 0;
+	foreach ($dsIDs as $dsID) {
+		echo "<option value=\"$dsID\">$subnetText $dsSubnets[$i] $maskText $dsNetmasks[$i]</option>";
+		$i = $i + 1;
+	}
+}
+echo "</select><br>";
+echo "<input type=\"submit\" value=\"Submit\"><br>";
+echo "</form>";
+echo "</div>";
 
 
 
