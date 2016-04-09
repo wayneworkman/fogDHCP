@@ -14,6 +14,7 @@ $dhcpdSetting="dhcpd=";
 $SettingsFile="/opt/fog/.fogsettings";
 $New_Line="\n";
 $NotAvailable="NA";
+$globalIdentifier = "2000000";
 $Failed="";
 $TimeZone="UTC";
 date_default_timezone_set($TimeZone);
@@ -83,6 +84,9 @@ function CheckDHCP() {
 	global $True;
 	global $False;
 	global $ONLY_LOG_CHANGES;
+	global $sql;
+	global $link;
+
 
 	// Bad status patterns.
 	$bad1="Active: inactive (dead)";
@@ -117,6 +121,16 @@ function CheckDHCP() {
 	} else {
 		$Failed=$True;
 		WriteLog("Could not reliably determine the state of the DHCP service. You should imediately investigate it's status.");
+	}
+
+	$sql = "UPDATE `globalSettings` SET settingValue = '$Failed' WHERE `settingKey` = 'DHCP_FAILED'";
+	if ($link->query($sql)) {
+		// Status updated.
+		if ($ONLY_LOG_CHANGES == "0") {
+			WriteLog("The DHCP_FAILED status was successfully updated with the value \"$Failed\".");
+		}
+	} else {
+		WriteLog("Could not upate the DHCP_FAILED value in the globalSettings table, attempted to set the value to \"$Failed\".");
 	}
 }
 
@@ -360,7 +374,7 @@ while(1) {
 
 
 	//Build global classes. All classes with a dc_dsID greater than one-million are global.   
-	$sql = "SELECT * FROM `dhcpClasses` WHERE `dc_dsID` = 2000000 ORDER BY `dcID` ASC";
+	$sql = "SELECT * FROM `dhcpClasses` WHERE `dc_dsID` = $globalIdentifier ORDER BY `dcID` ASC";
 	$result2 = $link->query($sql);
 		if ($result2->num_rows > 0) {
 			while($row2 = $result2->fetch_assoc()) {
@@ -568,7 +582,7 @@ while(1) {
 
 
 	//Build Global Reservations.
-	$sql = "SELECT * FROM `dhcpReservations` WHERE `dr_dsID` = 2000000 ORDER BY `drID` ASC";
+	$sql = "SELECT * FROM `dhcpReservations` WHERE `dr_dsID` = $globalIdentifier ORDER BY `drID` ASC";
 	$result = $link->query($sql);
 	if ($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
