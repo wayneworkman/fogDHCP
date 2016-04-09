@@ -244,17 +244,88 @@ if ($result->num_rows > 0) {
 		}
 		$result2->free();
 
-		echo "}<br>";
 
 
-
-
-		
+		//Get reservations for this subnet.
+		$sql = "SELECT `drID`,`drMAC`,`drName`,`drFilename`,`drIP`,`drOptionDomainNameServers`,`drCustomArea1`,`drCustomArea2`,`drCustomArea3` FROM dhcpReservations WHERE `dr_dsID` = $dsID ORDER BY `drID` ASC";
+		$result = $link->query($sql);
+		if ($result->num_rows > 0) {
+			echo "<br>";
+			echo "$tab Reservations inside of $subnetText $dsSubnet $maskText $dsNetMask:<br>";
+			while($row = $result->fetch_assoc()) {
+				$drID = trim(htmlspecialchars($row["drID"]));
+				$drMAC = trim(htmlspecialchars($row["drMAC"]));
+				$drName = trim(htmlspecialchars($row["drName"]));
+				$drFilename = trim(htmlspecialchars($row["drFilename"]));
+				$drIP = trim(htmlspecialchars($row["drIP"]));
+				$drOptionDomainNameServers = trim(htmlspecialchars($row["drOptionDomainNameServers"]));
+				$drCustomArea1 = trim(htmlspecialchars($row["drCustomArea1"]));
+				$drCustomArea2 = trim(htmlspecialchars($row["drCustomArea2"]));
+				$drCustomArea3 = trim(htmlspecialchars($row["drCustomArea3"]));
+				echo "<form action=\"$formAction\" method=\"post\">";
+				echo "<br>";
+				echo "<input type=\"hidden\" name=\"type\" value=\"$existingReservation\">";
+				echo "<input type=\"hidden\" name=\"id\" value=\"$drID\">";
+				echo "$tab host <input type=\"text\" name=\"drName\" value=\"$drName\"> {<br>";
+				echo "$tab$tab hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"$drMAC\">;<br>";
+				echo "$tab$tab fixed-address <input type=\"text\" name=\"drIP\" value=\"$drIP\">;<br>";
+				echo "$tab$tab filename \"<input type=\"text\" name=\"drFilename\" value=\"$drFilename\">\";<br>";
+				echo "$tab$tab option domain-name-servers <input type=\"text\" name=\"drOptionDomainNameServers\" value=\"$drOptionDomainNameServers\">;<br>";
+				echo "$tab$tab Custom Area 1 <input type=\"text\" name=\"drCustomArea1\" value=\"$drCustomArea1\"><br>";
+				echo "$tab$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"$drCustomArea2\"><br>";
+				echo "$tab$tab Custom Area 3 <input type=\"text\" name=\"drCustomArea3\" value=\"$drCustomArea3\"><br>";
+				echo "$tab}<br>";
+				echo "$tab $globalText or $subnetText: <select name=\"dr_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetMask</option>";
+				echo "<option value=\"$globalIdentifier\">$globalText</option>";
+				if ($subnetsExist = "1") {
+					$i = 0;
+					foreach ($dsIDs as $reservationDsID) {
+						if ($reservationDsID != $dsID) {
+						echo "<option value=\"$reservationDsID\">$subnetText $dsSubnets[$i] $maskText $dsNetmasks[$i]</option>";
+						$i = $i + 1;
+						}
+					}
+				}
+				echo "</select><br>";
+				echo "$tab Delete <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+				echo "</form>";
+			}
+		}
+		echo "}<br>";		
 	}
 } else {
 	echo "There are no $subnetText defined.<br>";
 }
 $result->free();
+echo "</div>";
+
+
+
+echo "<br><br>";
+
+
+
+
+
+// New subnet
+echo "<div>";
+echo "<form action=\"$formAction\" method=\"post\">";
+echo "<br>";
+echo "<input type=\"hidden\" name=\"type\" value=\"$newSubnet\">";
+echo "$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"\"> $maskText <input type=\"text\" name=\"dsNetMask\" value=\"\"> {<br>";
+echo "$tab option subnet-mask <input type=\"text\" name=\"dsNetMask\" value=\"\">;<br>";
+echo "$tab range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"\">;<br>";
+echo "$tab default-lease-time <input type=\"text\" name=\"dsDefaultLeaseTime\" value=\"\">;<br>";
+echo "$tab max-lease-time <input type=\"text\" name=\"dsMaxLeaseTime\" value=\"\">;<br>";
+echo "$tab option routers <input type=\"text\" name=\"dsOptionRouters\" value=\"\">;<br>";
+echo "$tab option domain-name-servers <input type=\"text\" name=\"dsOptionDomainNameServers\" value=\"\">;<br>";
+echo "$tab option ntp-servers <input type=\"text\" name=\"dsOptionNtpServers\" value=\"\">;<br>";
+echo "$tab next-server <input type=\"text\" name=\"dsNextServer\" value=\"\">;<br>";
+echo "$tab Custom Area 1: <input type=\"text\" name=\"dsCustomArea1\" value=\"\"><br>";
+echo "$tab Custom Area 2: <input type=\"text\" name=\"dsCustomArea2\" value=\"\"><br>";
+echo "$tab Custom Area 3: <input type=\"text\" name=\"dsCustomArea3\" value=\"\"><br>";
+echo "<input type=\"submit\" value=\"Submit\"><br>";
+echo "</form>";
 echo "</div>";
 
 
@@ -266,6 +337,66 @@ echo "</div>";
 
 
 
+echo "<br><br>";
+
+
+
+
+// DHCP Reservations
+echo "<div>";
+$sql = "SELECT `drID`,`drMAC`,`drName`,`drFilename`,`drIP`,`drOptionDomainNameServers`,`drCustomArea1`,`drCustomArea2`,`drCustomArea3` FROM dhcpReservations WHERE `dr_dsID` = $globalIdentifier ORDER BY `drID` ASC";
+$result = $link->query($sql);
+if ($result->num_rows > 0) {
+	echo "$globalText reservation(s):";
+	while($row = $result->fetch_assoc()) {
+		$drID = trim(htmlspecialchars($row["drID"]));
+		$drMAC = trim(htmlspecialchars($row["drMAC"]));
+		$drName = trim(htmlspecialchars($row["drName"]));
+		$drFilename = trim(htmlspecialchars($row["drFilename"]));
+		$drIP = trim(htmlspecialchars($row["drIP"]));
+		$drOptionDomainNameServers = trim(htmlspecialchars($row["drOptionDomainNameServers"]));
+		$drCustomArea1 = trim(htmlspecialchars($row["drCustomArea1"]));
+		$drCustomArea2 = trim(htmlspecialchars($row["drCustomArea2"]));
+		$drCustomArea3 = trim(htmlspecialchars($row["drCustomArea3"]));
+		echo "<form action=\"$formAction\" method=\"post\">";
+		echo "<br>";
+		echo "<input type=\"hidden\" name=\"type\" value=\"$existingReservation\">";
+		echo "<input type=\"hidden\" name=\"id\" value=\"$drID\">";
+		echo "host <input type=\"text\" name=\"drName\" value=\"$drName\"> {<br>";
+		echo "$tab hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"$drMAC\">;<br>";
+		echo "$tab fixed-address <input type=\"text\" name=\"drIP\" value=\"$drIP\">;<br>";
+		echo "$tab filename \"<input type=\"text\" name=\"drFilename\" value=\"$drFilename\">\";<br>";
+		echo "$tab option domain-name-servers <input type=\"text\" name=\"drOptionDomainNameServers\" value=\"$drOptionDomainNameServers\">;<br>";
+		echo "$tab Custom Area 1 <input type=\"text\" name=\"drCustomArea1\" value=\"$drCustomArea1\"><br>";
+		echo "$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"$drCustomArea2\"><br>";
+		echo "$tab Custom Area 3 <input type=\"text\" name=\"drCustomArea3\" value=\"$drCustomArea3\"><br>";
+		echo "}<br>";
+		echo "$globalText or $subnetText: <select name=\"dr_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
+		if ($subnetsExist = "1") {
+			$i = 0;
+			foreach ($dsIDs as $dsID) {
+				echo "<option value=\"$dsID\">$subnetText $dsSubnets[$i] $maskText $dsNetmasks[$i]</option>";
+				$i = $i + 1;
+			}
+		}
+		echo "</select><br>";
+		echo "Delete <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+		echo "</form>";
+	}
+} else {
+	echo "There are no $globalText reservations.<br>";
+}
+echo "</div>";
+
+
+
+
+
+
+//-----------begin Temporary code---------------//
 echo "</body>";
 echo "</html>";
+//-------------end temporary code--------------//
+
+
 ?>
