@@ -38,7 +38,7 @@ echo "<div>";
 $sql = "SELECT `dgID`,`dgOption` FROM `dhcpGlobals` ORDER BY `dgID` ASC";
 $result = $link->query($sql);
 if ($result->num_rows > 0) {
-	echo "Global options:";
+	echo "$globalText option(s):<br>";
         while($row = $result->fetch_assoc()) {
                 $dgID = trim(htmlspecialchars($row["dgID"]));
                 $dgOption = trim(htmlspecialchars($row["dgOption"]));
@@ -48,10 +48,12 @@ if ($result->num_rows > 0) {
 			echo "</form";
 		}
         }
+} else {
+	echo "There are no $globalText options defined.<br>";
 }
 $result->free();
 echo "<form action=\"$formAction\" method=\"post\">";
-echo "New Global Option:<br>";
+echo "New $globalText option:<br>";
 echo "<input type=\"hidden\" name=\"type\" value=\"$newGlobalOption\"><input type=\"text\" name=\"globalOption\" value=\"\">  <input type=\"submit\" value=\"Submit\"><br>";
 echo "</form>";
 echo "</div>";
@@ -88,7 +90,7 @@ echo "<div>";
 $sql = "SELECT `dcID`,`dcClass`,`dcMatch`,`dcMatchOption1`,`dcMatchOption2`,`dcMatchOption3` FROM `dhcpClasses` WHERE dc_dsID = $globalIdentifier ORDER BY `dcID` ASC";
 $result = $link->query($sql);
 if ($result->num_rows > 0) {
-	echo "Global Classes:";
+	echo "$globalText Classe(s):";
 	while($row = $result->fetch_assoc()) {
 		$dcID = trim(htmlspecialchars($row["dcID"]));
 		$dcClass = trim(htmlspecialchars($row["dcClass"]));
@@ -97,6 +99,7 @@ if ($result->num_rows > 0) {
 		$dcMatchOption2 = trim(htmlspecialchars($row["dcMatchOption2"]));
 		$dcMatchOption3 = trim(htmlspecialchars($row["dcMatchOption3"]));
 		echo "<form action=\"$formAction\" method=\"post\">";
+		echo "<br>";
 		echo "<input type=\"hidden\" name=\"type\" value=\"$existingClass\">";
 		echo "<input type=\"hidden\" name=\"id\" value=\"$dcID\">";
 		echo "class \"<input type=\"text\" name=\"dcClass\" value=\"$dcClass\">\" {<br>";
@@ -105,7 +108,7 @@ if ($result->num_rows > 0) {
 		echo "$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"$dcMatchOption2\"><br>";
 		echo "$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"$dcMatchOption3\"><br>";
 		echo "}<br>";
-		echo "Global or Subnet: <select name=\"dc_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
+		echo "$globalText or $subnetText: <select name=\"dc_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
 		if ($subnetsExist = "1") {
 			$i = 0;
 			foreach ($dsIDs as $dsID) {
@@ -117,6 +120,8 @@ if ($result->num_rows > 0) {
 		echo "Delete <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
 		echo "</form>";
 	}
+} else {
+	echo "There are no $globalText classes defined.<br>";
 }
 $result->free();
 echo "</div>";
@@ -135,7 +140,7 @@ echo "$tab Match Option 1: <input type=\"text\" name=\"dcMatchOption1\" value=\"
 echo "$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"\"><br>";
 echo "$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"\"><br>";
 echo "}<br>";
-echo "Global or Subnet: <select name=\"dc_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
+echo "$globalText or $subnetText: <select name=\"dc_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
 if ($subnetsExist = "1") {
 	$i = 0;
 	foreach ($dsIDs as $dsID) {
@@ -160,7 +165,7 @@ echo "<div>";
 $sql = "SELECT `dsID`,`dsSubnet`,`dsNetMask`,`dsOptionSubnetMask`,`dsRangeDynamicBootpStart`,`dsRangeDynamicBootpEnd`,`dsDefaultLeaseTime`,`dsMaxLeaseTime`,`dsOptionRouters`,`dsOptionDomainNameServers`,`dsOptionNtpServers`,`dsNextServer`,`dsCustomArea1`,`dsCustomArea2`,`dsCustomArea3` FROM dhcpSubnets ORDER BY `dsID` ASC";
 $result = $link->query($sql);
 if ($result->num_rows > 0) {
-	echo "Subnets:";
+	echo "$subnetText(s):";
 	while($row = $result->fetch_assoc()) {
 		$dsID = trim(htmlspecialchars($row["dsID"]));
 		$dsSubnet = trim(htmlspecialchars($row["dsSubnet"]));
@@ -178,6 +183,7 @@ if ($result->num_rows > 0) {
 		$dsCustomArea2 = trim(htmlspecialchars($row["dsCustomArea2"]));
 		$dsCustomArea3 = trim(htmlspecialchars($row["dsCustomArea3"]));
 		echo "<form action=\"$formAction\" method=\"post\">";
+		echo "<br>";
 		echo "<input type=\"hidden\" name=\"type\" value=\"$existingSubnet\">";
 		echo "<input type=\"hidden\" name=\"id\" value=\"$dsID\">";
 		echo "$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"$dsSubnet\"> $maskText <input type=\"text\" name=\"dsNetMask\" value=\"$dsNetMask\"> {<br>";
@@ -192,21 +198,63 @@ if ($result->num_rows > 0) {
 		echo "$tab Custom Area 1: <input type=\"text\" name=\"dsCustomArea1\" value=\"$dsCustomArea1\"><br>";
 		echo "$tab Custom Area 2: <input type=\"text\" name=\"dsCustomArea2\" value=\"$dsCustomArea2\"><br>";
 		echo "$tab Custom Area 3: <input type=\"text\" name=\"dsCustomArea3\" value=\"$dsCustomArea3\"><br>";
+		echo "Delete entire subnet and all associated classes and reservations <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+		echo "</form>";
+
+
+
+		//Get classes for this subnet.
+		$sql = "SELECT `dcID`,`dcClass`,`dcMatch`,`dcMatchOption1`,`dcMatchOption2`,`dcMatchOption3` FROM `dhcpClasses` WHERE dc_dsID = $dsID ORDER BY `dcID` ASC";
+		$result2 = $link->query($sql);
+		if ($result2->num_rows > 0) {
+			echo "<br>";
+			echo "$tab Classes inside of $subnetText $dsSubnet $maskText $dsNetMask:<br>";
+			while($row2 = $result2->fetch_assoc()) {
+				$dcID = trim(htmlspecialchars($row2["dcID"]));
+				$dcClass = trim(htmlspecialchars($row2["dcClass"]));
+				$dcMatch = trim(htmlspecialchars($row2["dcMatch"]));
+				$dcMatchOption1 = trim(htmlspecialchars($row2["dcMatchOption1"]));
+				$dcMatchOption2 = trim(htmlspecialchars($row2["dcMatchOption2"]));
+				$dcMatchOption3 = trim(htmlspecialchars($row2["dcMatchOption3"]));
+				echo "<form action=\"$formAction\" method=\"post\">";
+				echo "<br>";
+				echo "<input type=\"hidden\" name=\"type\" value=\"$existingClass\">";
+				echo "<input type=\"hidden\" name=\"id\" value=\"$dcID\">";
+				echo "$tab class \"<input type=\"text\" name=\"dcClass\" value=\"$dcClass\">\" {<br>";
+				echo "$tab$tab Match: <input type=\"text\" name=\"dcMatch\" value=\"$dcMatch\"><br>";
+				echo "$tab$tab Match Option 1: <input type=\"text\" name=\"dcMatchOption1\" value=\"$dcMatchOption1\"><br>";
+				echo "$tab$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"$dcMatchOption2\"><br>";
+				echo "$tab$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"$dcMatchOption3\"><br>";
+				echo "$tab }<br>";
+				echo "$tab $globalText or $subnetText: <select name=\"dc_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetMask</option>";
+				echo "<option value=\"$globalIdentifier\">$globalText</option>";
+				if ($subnetsExist = "1") {
+					$i = 0;
+					foreach ($dsIDs as $classDsID) {
+						if ($classDsID != $dsID) {
+							echo "<option value=\"$classDsID\">$subnetText $dsSubnets[$i] $maskText $dsNetmasks[$i]</option>";
+							$i = $i + 1;
+						}
+					}
+				}
+				echo "</select><br>";
+				echo "$tab Delete <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+				echo "</form>";
+			}
+		}
+		$result2->free();
+
 		echo "}<br>";
-		echo "Delete<input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
-		echo "</form";
 
 
 
 
 		
 	}
+} else {
+	echo "There are no $subnetText defined.<br>";
 }
-
-
-
-
-
+$result->free();
 echo "</div>";
 
 
