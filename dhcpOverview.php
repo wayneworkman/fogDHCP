@@ -44,7 +44,7 @@ $newReservation = "7";
 $dsSubnets = array();
 $dsNetmasks = array();
 $dsIDs = array();
-$sql = "SELECT `dsSubnet`,`dsNetmask`,`dsID` FROM dhcpSubnets ORDER BY `dsID` ASC";
+$sql = "SELECT `dsSubnet`,`dsNetmask`,`dsID` FROM `dhcpSubnets` ORDER BY `dsID` ASC";
 $result = $link->query($sql);
 if ($result->num_rows > 0) {
         $subnetsExist = "1";
@@ -58,6 +58,19 @@ if ($result->num_rows > 0) {
 }
 
 
+
+// Get list of filenames for use with other bodies.
+$dfFileNames = array();
+$sql = "SELECT `dfFileName` FROM `dhcpFilenames` ORDER BY `dfID` ASC";
+$result = $link->query($sql);
+if ($result->num_rows > 0) {
+	$filenamesExist = "1";
+	while($row = $result->fetch_assoc()) {
+		$dfFileNames[] = trim(htmlspecialchars($row["dfFileName"]));
+	}
+} else {
+	$filenamesExist = "0";
+}
 
 
 
@@ -168,8 +181,8 @@ if ($result->num_rows > 0) {
 		echo "<input type=\"hidden\" name=\"type\" value=\"$existingSubnet\">";
 		echo "<input type=\"hidden\" name=\"id\" value=\"$dsID\">";
 		echo "<font color=\"$requiredColor\">*</font>$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"$dsSubnet\"> <font color=\"$requiredColor\">*</font>$maskText <input type=\"text\" name=\"dsNetMask\" value=\"$dsNetMask\"> {<br>";
+		echo "$tab<font color=\"$requiredColor\">*</font>range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"$dsRangeDynamicBootpStart\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"$dsRangeDynamicBootpEnd\">;<br>";
 		echo "$tab option subnet-mask <input type=\"text\" name=\"dsNetMask\" value=\"$dsNetMask\">;<br>";
-		echo "$tab range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"$dsRangeDynamicBootpStart\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"$dsRangeDynamicBootpEnd\">;<br>";
 		echo "$tab default-lease-time <input type=\"text\" name=\"dsDefaultLeaseTime\" value=\"$dsDefaultLeaseTime\">;<br>";
 		echo "$tab max-lease-time <input type=\"text\" name=\"dsMaxLeaseTime\" value=\"$dsMaxLeaseTime\">;<br>";
 		echo "$tab option routers <input type=\"text\" name=\"dsOptionRouters\" value=\"$dsOptionRouters\">;<br>";
@@ -250,7 +263,7 @@ if ($result->num_rows > 0) {
 				echo "$tab<font color=\"$requiredColor\">*</font>host <input type=\"text\" name=\"drName\" value=\"$drName\"> {<br>";
 				echo "$tab$tab<font color=\"$requiredColor\">*</font>hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"$drMAC\">;<br>";
 				echo "$tab$tab fixed-address <input type=\"text\" name=\"drIP\" value=\"$drIP\">;<br>";
-				echo "$tab$tab filename \"<input type=\"text\" name=\"drFilename\" value=\"$drFilename\">\";<br>";
+				echo "$tab$tab filename \"<input type=\"text\" list=\"filename\" value=\"$drFilename\"><datalist id=\"filename\">";foreach ($dfFileNames as $dfFileName) {echo "<option>$dfFileName</option>";}echo "</datalist>\";<br>";
 				echo "$tab$tab option domain-name-servers <input type=\"text\" name=\"drOptionDomainNameServers\" value=\"$drOptionDomainNameServers\">;<br>";
 				echo "$tab$tab Custom Area 1 <input type=\"text\" name=\"drCustomArea1\" value=\"$drCustomArea1\"><br>";
 				echo "$tab$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"$drCustomArea2\"><br>";
@@ -316,7 +329,7 @@ if ($result->num_rows > 0) {
 		echo "<font color=\"$requiredColor\">*</font>host <input type=\"text\" name=\"drName\" value=\"$drName\"> {<br>";
 		echo "$tab<font color=\"$requiredColor\">*</font>hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"$drMAC\">;<br>";
 		echo "$tab fixed-address <input type=\"text\" name=\"drIP\" value=\"$drIP\">;<br>";
-		echo "$tab filename \"<input type=\"text\" name=\"drFilename\" value=\"$drFilename\">\";<br>";
+		echo "$tab filename \"<input type=\"text\" list=\"filename\" value=\"$drFilename\"><datalist id=\"filename\">";foreach ($dfFileNames as $dfFileName) {echo "<option>$dfFileName</option>";}echo "</datalist>\";<br>";
 		echo "$tab option domain-name-servers <input type=\"text\" name=\"drOptionDomainNameServers\" value=\"$drOptionDomainNameServers\">;<br>";
 		echo "$tab Custom Area 1 <input type=\"text\" name=\"drCustomArea1\" value=\"$drCustomArea1\"><br>";
 		echo "$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"$drCustomArea2\"><br>";
@@ -400,8 +413,8 @@ echo "<form action=\"$formAction\" method=\"post\">";
 echo "New $subnetText:<br><br>";
 echo "<input type=\"hidden\" name=\"type\" value=\"$newSubnet\">";
 echo "<font color=\"$requiredColor\">*</font>$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"\"> <font color=\"$requiredColor\">*</font>$maskText <input type=\"text\" name=\"dsNetMask\" value=\"\"> {<br>";
+echo "$tab<font color=\"$requiredColor\">*</font>range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"\">;<br>";
 echo "$tab option subnet-mask <input type=\"text\" name=\"dsNetMask\" value=\"\">;<br>";
-echo "$tab range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"\">;<br>";
 echo "$tab default-lease-time <input type=\"text\" name=\"dsDefaultLeaseTime\" value=\"\">;<br>";
 echo "$tab max-lease-time <input type=\"text\" name=\"dsMaxLeaseTime\" value=\"\">;<br>";
 echo "$tab option routers <input type=\"text\" name=\"dsOptionRouters\" value=\"\">;<br>";
@@ -433,7 +446,7 @@ echo "<input type=\"hidden\" name=\"type\" value=\"$newReservation\">";
 echo "<font color=\"$requiredColor\">*</font>host <input type=\"text\" name=\"drName\" value=\"\"> {<br>";
 echo "$tab<font color=\"$requiredColor\">*</font>hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"\">;<br>";
 echo "$tab fixed-address <input type=\"text\" name=\"drIP\" value=\"\">;<br>";
-echo "$tab filename \"<input type=\"text\" name=\"drFilename\" value=\"\">\";<br>";
+echo "$tab filename \"<input type=\"text\" list=\"filename\"><datalist id=\"filename\">";foreach ($dfFileNames as $dfFileName) {echo "<option>$dfFileName</option>";}echo "</datalist>\";<br>";
 echo "$tab option domain-name-servers <input type=\"text\" name=\"drOptionDomainNameServers\" value=\"\">;<br>";
 echo "$tab Custom Area 1 <input type=\"text\" name=\"drCustomArea1\" value=\"\"><br>";
 echo "$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"\"><br>";

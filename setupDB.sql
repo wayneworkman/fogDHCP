@@ -9,8 +9,8 @@ dsID int NOT NULL AUTO_INCREMENT,
 dsSubnet VARCHAR(50) NOT NULL,
 dsNetmask VARCHAR(50) NOT NULL,
 dsOptionSubnetMask VARCHAR(50),
-dsRangeDynamicBootpStart VARCHAR(50),
-dsRangeDynamicBootpEnd VARCHAR(50),
+dsRangeDynamicBootpStart VARCHAR(50) NOT NULL,
+dsRangeDynamicBootpEnd VARCHAR(50) NOT NULL,
 dsDefaultLeaseTime int,
 dsMaxLeaseTime int,
 dsOptionRouters VARCHAR(50),
@@ -52,4 +52,31 @@ drCustomArea3 VARCHAR(255),
 PRIMARY KEY (drID)
 );
 
+
+
+TRUNCATE TABLE dhcpFilenames;
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('undionly.kkpxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('undionly.kpxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('ipxe.efi','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('ipxe.kkpxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('intel.efi','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('realtek.efi','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('snp.efi','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('snponly.efi','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('intel.kkpxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('intel.kpxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('intel.pxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('ipxe.iso','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('ipxe.kpxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('ipxe.pxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('pxelinux.0','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('realtek.kkpxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('realtek.kpxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('realtek.pxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('undionly.pxe','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('i386-efi/intel.efi','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('i386-efi/ipxe.efi','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('i386-efi/realtek.efi','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('i386-efi/snp.efi','');
+INSERT INTO `dhcpFilenames` (dfFilename,dfDescription) VALUES ('i386-efi/snponly.efi','');
 
