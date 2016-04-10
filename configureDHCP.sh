@@ -29,16 +29,19 @@ mysql -s -D fog -e "DROP TABLE dhcpSubnets"
 mysql -s -D fog -e "DROP TABLE dhcpClasses"
 mysql -s -D fog -e "DROP TABLE dhcpFilenames"
 mysql -s -D fog -e "DROP TABLE dhcpReservations"
-mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Restart_Command'"
-mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Status_Command'"
-mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_To_Use'"
-mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Service_Sleep_Time'"
-mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_Method'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_RESTART_COMMAND'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_STATUS_COMMAND'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_TO_USE'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_SERVICE_SLEEP_TIME'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_METHOD'"
 mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'ONLY_LOG_CHANGES'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_SERVICE_ENABLED'"
 #-----End Temporary Lines-----#
 
-            mysql < /root/fogDHCP/setupDB.sql
+            mysql < /var/www/html/fogDHCP/setupDB.sql
             dhcpDataExists=$(mysql -s -D fog -e "SELECT COUNT(*) FROM globalSettings where settingKey = 'DHCP_Service_Sleep_Time' ")
+
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_SERVICE_ENABLED','This setting controls if the DHCP manager service should attempt to do anything or not. 1 means yes, 0 means no.','1','DHCP');"
 
             [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_SERVICE_SLEEP_TIME','This setting controls how often in seconds the DHCP service will check for changes made to DHCP. If changes are found, the dhcp configuration file is updated and a DHCP service restart is attempted.','60','FOG Linux Service Sleep Times');"
 
@@ -200,7 +203,7 @@ mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'ONLY_LOG_CHAN
                             sleep 2
                             service $dhcpd start >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             sleep 2
-                            service status $dhcpd >>$workingdir/error_logs/fog_error_${version}.log 2>&1
+                            service $dhcpd status >>$workingdir/error_logs/fog_error_${version}.log 2>&1
                             ;;
                         2)
                             #Case 2 is set as 2.

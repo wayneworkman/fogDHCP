@@ -16,6 +16,7 @@ $New_Line="\n";
 $NotAvailable="NA";
 $globalIdentifier = "2000000";
 $Failed="";
+$FailTimeout="3600"; // If service recovers from a failed dhcp restart, wait this amount of time before trying again to minimize service disruptions.
 $TimeZone="UTC";
 date_default_timezone_set($TimeZone);
 
@@ -174,6 +175,32 @@ while(1) {
 
 
 	
+
+
+
+
+
+	// See if service is enabled or not.
+	$sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey` = 'DHCP_SERVICE_ENABLED' LIMIT 1";
+	$result = $link->query($sql);
+	if ($result->num_rows > 0) {
+		while($row = $result->fetch_assoc()) {
+			$tmp = trim($row["settingValue"]);
+			if ($tmp != "") {
+				$DHCP_SERVICE_ENABLED = $tmp;
+			} else {
+				$DHCP_SERVICE_ENABLED="0";
+				WriteLog("The DHCP_SERVICE_ENABLED setting in the globalSettings table only has white space in it. Default state of \"$DHCP_SERVICE_ENABLED\" is set.");
+			}
+		}
+	} else {
+		$DHCP_SERVICE_ENABLED="0";
+		WriteLog("Could not get the DHCP_SERVICE_ENABLED setting from the globalSettings table. Default state of \"$DHCP_SERVICE_ENABLED\" is set.");
+	}
+	$result->free();
+
+	
+
 
 	//Clear out the contents of the New_File variable.
 	$New_File = "";
@@ -341,7 +368,10 @@ while(1) {
 	}
 	$result->free();
 
+	
 
+	//Only proceed if service is enabled. Otherwise just sleep over and over until it is.
+	if ($DHCP_SERVICE_ENABLED = "1") {
 
 
 
@@ -735,7 +765,7 @@ while(1) {
 									WriteLog("It seems that either the old config file was bad too, or there are larger problems. Efforts to restore DHCP services have failed. You need to take imediate action to restore them.");
 								} else {
 									WriteLog("It seems that efforts to restore DHCP services from the old file have succeeded. You should investigate what is wrong with your configuration.");
-									$DHCP_SERVICE_SLEEP_TIME = 3600;
+									$DHCP_SERVICE_SLEEP_TIME = $FailTimeout;
 									WriteLog("DHCP_SERVICE_SLEEP_TIME has been set to \"$DHCP_SERVICE_SLEEP_TIME\" due to the recent failure in an effort to minimize interruptions. If you'd like this service to attempt to rebuild the DHCP config file and attempt a restart before then, you'll need to restart the service manually.");
 								}
 							}
@@ -763,6 +793,12 @@ while(1) {
 		unlink($tmpFile);
 	}
 	
+
+
+
+
+	// Here is where "if statement" for DHCP_SERVICE_ENABLED ends.
+	}
 
 
 
