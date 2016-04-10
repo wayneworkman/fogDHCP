@@ -25,7 +25,10 @@ $globalText = "global";
 $subnetText = "subnet";
 $maskText = "netmask";
 $requiredColor = "red";
-$tab = "&emsp;&emsp;"; //Note every $tab used in code is followed by a space.
+$tab = "&emsp;&emsp;"; //Note every $tab used in code is followed by a space or red asterisk.
+$True="True";
+$False="False";
+$NotAvailable="NA";
 $existingGlobalOption = "0";
 $newGlobalOption = "1";
 $existingClass = "2";
@@ -34,7 +37,7 @@ $existingSubnet = "4";
 $newSubnet = "5";
 $existingReservation = "6";
 $newReservation = "7";
-
+$SERVICE_ENABLED = "8";
 
 
 
@@ -56,6 +59,7 @@ if ($result->num_rows > 0) {
 } else {
         $subnetsExist = "0";
 }
+$result->free();
 
 
 
@@ -71,6 +75,76 @@ if ($result->num_rows > 0) {
 } else {
 	$filenamesExist = "0";
 }
+$result->free();
+
+
+
+
+// Get DHCP status.
+$sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey`='DHCP_FAILED' LIMIT 1";
+$result = $link->query($sql);
+if ($result->num_rows > 0) {
+	while($row = $result->fetch_assoc()) {
+		$DHCP_FAILED = trim(htmlspecialchars($row["settingValue"]));
+	}
+} else {
+	$DHCP_FAILED = $NotAvailable;
+}
+$result->free();
+
+
+
+
+
+
+// Get DHCP enabled.
+$sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey`='DHCP_SERVICE_ENABLED' LIMIT 1";
+$result = $link->query($sql);
+if ($result->num_rows > 0) {
+        $filenamesExist = "1";
+        while($row = $result->fetch_assoc()) {
+                $DHCP_SERVICE_ENABLED = trim(htmlspecialchars($row["dfFileName"]));
+        }
+} else {
+        $DHCP_SERVICE_ENABLED = "0";
+}
+$result->free();
+
+
+
+
+
+//Display DHCP status and enabled/disabled radio button.
+echo "<div>";
+echo "DHCP status is ";
+if ($DHCP_FAILED == $True) {
+	echo "<font color=\"red\"><b>FAILED!</b></font><br>";
+} else if ($DHCP_FAILED == $False) {
+	echo "<font color=\"green\"><b>ACTIVE!</b></font><br>";
+} else if ($DHCP_FAILED == $NotAvailable) {
+	echo "<font color=\"yellow\"><b>NOT AVAILABLE!</b></font><br>";
+} else {
+	echo "<font color=\"red\"><b>NOT IDENTIFIED!</b></font><br>";
+}
+echo "</div>";
+
+
+
+echo "<br><br>";
+
+
+echo "<div>";
+echo "<form action=\"$formAction\" method=\"post\">";
+echo "Enable or Disable DHCP manager service:<br>";
+echo "<input type=\"radio\" name=\"DHCP_SERVICE_ENABLED\" value=\"1\"";if ($DHCP_SERVICE_ENABLED = "1") {echo " checked";};echo "> Enabled<br>";
+echo "<input type=\"radio\" name=\"DHCP_SERVICE_ENABLED\" value=\"0\"";if ($DHCP_SERVICE_ENABLED = "0") {echo " checked";};echo "> Disabled<br>";
+echo "<input type=\"hidden\" name=\"type\" value=\"$SERVICE_ENABLED\"><input type=\"submit\" value=\"Submit\"><br>";
+echo "</form>";
+echo "</div>";
+
+
+
+echo "<br><br>";
 
 
 
@@ -192,7 +266,7 @@ if ($result->num_rows > 0) {
 		echo "$tab Custom Area 1: <input type=\"text\" name=\"dsCustomArea1\" value=\"$dsCustomArea1\"><br>";
 		echo "$tab Custom Area 2: <input type=\"text\" name=\"dsCustomArea2\" value=\"$dsCustomArea2\"><br>";
 		echo "$tab Custom Area 3: <input type=\"text\" name=\"dsCustomArea3\" value=\"$dsCustomArea3\"><br>";
-		echo "Delete entire subnet and all associated classes and reservations <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+		echo "<font color=\"red\">Delete entire subnet and all associated classes and reservations</font> <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
 		echo "</form>";
 
 

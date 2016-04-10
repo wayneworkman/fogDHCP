@@ -13,6 +13,7 @@ $DefaultLogFilePath="/opt/fog/log/"; // Include trailing slash here.
 $dhcpdSetting="dhcpd=";
 $SettingsFile="/opt/fog/.fogsettings";
 $New_Line="\n";
+$ONLY_LOG_CHANGES = "0";
 $NotAvailable="NA";
 $globalIdentifier = "2000000";
 $Failed="";
@@ -56,15 +57,15 @@ function RestartDHCP() {
 	global $NotAvailable;
 	global $dhcpd;
 	if ($DHCP_METHOD == "1") {
-		WriteLog(shell_exec("service $dhcpd stop;sleep 2;service $dhcpd start;sleep 2;service $dhcpd status;sleep 2"));
-		$dhcpStatus=shell_exec("service $dhcpd status");
+		$dhcpStatus=shell_exec("service $dhcpd stop;sleep 2;service $dhcpd start;sleep 2;service $dhcpd status;sleep 2");
+		WriteLog($dhcpStatus);
 	} else if ($DHCP_METHOD == "2") {
 		WriteLog(shell_exec("service $dhcpd stop;sleep 2;service $dhcpd start"));
 		$dhcpStatus=$NotAvailable;
 		WriteLog("The DHCP_METHOD is set to \"$DHCP_METHOD\". This means we don't know if DHCP is running properly or not. You should verify if it's OK.");
 	} else if ($DHCP_METHOD == "3") {
-		WriteLog(shell_exec("systemctl stop $dhcpd;sleep 2;systemctl start $dhcpd;sleep 2;systemctl status $dhcpd;sleep 2"));
-		$dhcpStatus=shell_exec("systemctl status $dhcpd");
+		$dhcpStatus=shell_exec("systemctl stop $dhcpd;sleep 2;systemctl start $dhcpd;sleep 2;systemctl status $dhcpd;sleep 2");
+		WriteLog($dhcpStatus);
 	} else if ($DHCP_METHOD == "0") {
 		WriteLog("The settingKey \"DHCP_METHOD\" in the globalSettings table is set to 0, no interaction with the system's DHCP service will be attempted.");
 		$dhcpStatus=$NotAvailable;
@@ -87,6 +88,8 @@ function CheckDHCP() {
 	global $ONLY_LOG_CHANGES;
 	global $sql;
 	global $link;
+	global $DHCP_METHOD;
+	global $dhcpd;
 
 
 	// Bad status patterns.
@@ -101,6 +104,39 @@ function CheckDHCP() {
 	// Good status patterns.
 	$good1="Active: active (running)";
 	$good2="start/running";
+
+
+
+	//Get status.
+	if ($DHCP_METHOD == "1") {
+		$dhcpStatus=shell_exec("service $dhcpd status");
+		if ($ONLY_LOG_CHANGES == "0") {
+			WriteLog($dhcpStatus);
+		}
+	} else if ($DHCP_METHOD == "2") {
+		$dhcpStatus=$NotAvailable;
+		if ($ONLY_LOG_CHANGES == "0") {
+			WriteLog("The DHCP_METHOD is set to \"$DHCP_METHOD\". This means we don't know if DHCP is running properly or not. You should verify if it's OK.");
+		}
+	} else if ($DHCP_METHOD == "3") {
+		$dhcpStatus=shell_exec("systemctl status $dhcpd");
+		if ($ONLY_LOG_CHANGES == "0") {
+			WriteLog($dhcpStatus);
+		}
+	} else if ($DHCP_METHOD == "0") {
+		if ($ONLY_LOG_CHANGES == "0") {
+			WriteLog("The settingKey \"DHCP_METHOD\" in the globalSettings table is set to 0, no interaction with the system's DHCP service will be attempted.");
+		}
+		$dhcpStatus=$NotAvailable;
+	} else {
+		if ($ONLY_LOG_CHANGES == "0") {
+			WriteLog("The settingKey \"DHCP_METHOD\" in the globalSettings table is set to something that is not supported. It's currently set to \"$DHCP_METHOD\"   Are there typos, white spaces, and/or other odd things?");
+		}
+		$dhcpStatus=$NotAvailable;
+	}
+
+
+
 
 	//Check for failure/success patterns.
 	if ((strpos($dhcpStatus, $bad1) == true) || (strpos($dhcpStatus, $bad2) == true) || (strpos($dhcpStatus, $bad3) == true) || (strpos($dhcpStatus, $bad4) == true) || (strpos($dhcpStatus, $bad5) == true) || (strpos($dhcpStatus, $bad6) == true) || (strpos($dhcpStatus, $bad7) == true)) {
@@ -367,6 +403,9 @@ while(1) {
 		WriteLog("Could not get the ONLY_LOG_CHANGES from the globalSettings table. Default option \"$ONLY_LOG_CHANGES\" is set.");
 	}
 	$result->free();
+
+
+	CheckDHCP();
 
 	
 
@@ -764,9 +803,9 @@ while(1) {
 								if ($Failed == $True) {
 									WriteLog("It seems that either the old config file was bad too, or there are larger problems. Efforts to restore DHCP services have failed. You need to take imediate action to restore them.");
 								} else {
-									WriteLog("It seems that efforts to restore DHCP services from the old file have succeeded. You should investigate what is wrong with your configuration.");
+									WriteLog("It seems that efforts to restore DHCP services from the known-good file \"$DHCP_TO_USE.good\" have succeeded. You should investigate what is wrong with your configuration.");
 									$DHCP_SERVICE_SLEEP_TIME = $FailTimeout;
-									WriteLog("DHCP_SERVICE_SLEEP_TIME has been set to \"$DHCP_SERVICE_SLEEP_TIME\" due to the recent failure in an effort to minimize interruptions. If you'd like this service to attempt to rebuild the DHCP config file and attempt a restart before then, you'll need to restart the service manually.");
+									WriteLog("DHCP_SERVICE_SLEEP_TIME has been set to \"$DHCP_SERVICE_SLEEP_TIME\" seconds due to the recent failure in an effort to minimize interruptions. If you'd like this service to attempt to rebuild the DHCP config file and attempt a restart before then, you'll need to restart the service manually.");
 								}
 							}
 						} else {
@@ -798,12 +837,19 @@ while(1) {
 
 
 	// Here is where "if statement" for DHCP_SERVICE_ENABLED ends.
+	} else {
+		if ($ONLY_LOG_CHANGES == "0") {
+			WriteLog("The DHCP_SERVICE_ENABLED setting in the globalSettings table is set to \"$DHCP_SERVICE_ENABLED\", not attempting to change anything.");
+		}
 	}
 
 
 
 
 	// Sleep.
+	if ($ONLY_LOG_CHANGES == "0") {
+		WriteLog("Sleeping for \"$DHCP_SERVICE_SLEEP_TIME\" seconds.");
+	}
 	sleep($DHCP_SERVICE_SLEEP_TIME);
 
 
