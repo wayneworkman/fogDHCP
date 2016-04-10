@@ -190,8 +190,10 @@ if ($result->num_rows > 0) {
                 $dgOption = trim(htmlspecialchars($row["dgOption"]));
 		if ($dgOption != "") {
 			echo "<form action=\"$formAction\" method=\"post\">";
-			echo "<input type=\"hidden\" name=\"type\" value=\"$existingGlobalOption\"><input type=\"hidden\" name=\"id\" value=\"$dgID\"><input type=\"text\" name=\"dgOption\" value=\"$dgOption\"> Delete<input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
-			echo "</form";
+			echo "<input type=\"hidden\" name=\"type\" value=\"$existingGlobalOption\"><input type=\"hidden\" name=\"id\" value=\"$dgID\"><input type=\"text\" name=\"dgOption\" value=\"$dgOption\">";
+			echo "Delete:<input type=\"radio\" name=\"itemAction\" value=\"delete\"> Save:<input type=\"radio\" name=\"itemAction\" value=\"save\" checked>";
+			echo "<input type=\"submit\" value=\"Submit\"><br>";
+			echo "</form>";
 		}
         }
 } else {
@@ -232,7 +234,8 @@ if ($result->num_rows > 0) {
 		echo "$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"$dcMatchOption2\"><br>";
 		echo "$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"$dcMatchOption3\"><br>";
 		echo "}<br>";
-		echo "Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dc_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
+		echo "Copy to:<input type=\"radio\" name=\"itemAction\" value=\"copy\"> Move to:<input type=\"radio\" name=\"itemAction\" value=\"move\"> Delete:<input type=\"radio\" name=\"itemAction\" value=\"delete\"> Save:<input type=\"radio\" name=\"itemAction\" value=\"save\" checked>";
+		echo "<select name=\"dc_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
 		if ($subnetsExist = "1") {
 			$i = 0;
 			foreach ($dsIDs as $dsID) {
@@ -241,7 +244,7 @@ if ($result->num_rows > 0) {
 			}
 		}
 		echo "</select><br>";
-		echo "Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
+		echo "<input type=\"submit\" value=\"Submit\"><br>";
 		echo "</form>";
 	}
 } else {
@@ -297,7 +300,7 @@ if ($result->num_rows > 0) {
 		echo "$tab Custom Area 1: <input type=\"text\" name=\"dsCustomArea1\" value=\"$dsCustomArea1\"><br>";
 		echo "$tab Custom Area 2: <input type=\"text\" name=\"dsCustomArea2\" value=\"$dsCustomArea2\"><br>";
 		echo "$tab Custom Area 3: <input type=\"text\" name=\"dsCustomArea3\" value=\"$dsCustomArea3\"><br>";
-		echo "<font color=\"red\">Delete entire subnet and all associated classes and reservations</font> <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+		echo "<font color=\"red\">Delete entire subnet and all associated classes and reservations:</font><input type=\"radio\" name=\"itemAction\" value=\"delete\"> Save:<input type=\"radio\" name=\"itemAction\" value=\"save\" checked><input type=\"submit\" value=\"Submit\"><br>";
 		echo "</form>";
 
 
@@ -325,7 +328,8 @@ if ($result->num_rows > 0) {
 				echo "$tab$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"$dcMatchOption2\"><br>";
 				echo "$tab$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"$dcMatchOption3\"><br>";
 				echo "$tab }<br>";
-				echo "$tab Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dc_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetmask</option>";
+				echo "$tab Copy to:<input type=\"radio\" name=\"itemAction\" value=\"copy\"> Move to:<input type=\"radio\" name=\"itemAction\" value=\"move\"> Delete:<input type=\"radio\" name=\"itemAction\" value=\"delete\"> Save:<input type=\"radio\" name=\"itemAction\" value=\"save\" checked>";
+				echo "<select name=\"dc_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetmask</option>";
 				echo "<option value=\"$globalIdentifier\">$globalText</option>";
 				if ($subnetsExist = "1") {
 					$i = 0;
@@ -337,7 +341,7 @@ if ($result->num_rows > 0) {
 					}
 				}
 				echo "</select><br>";
-				echo "$tab Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
+				echo "$tab <input type=\"submit\" value=\"Submit\"><br>";
 				echo "</form>";
 			}
 		}
@@ -374,7 +378,8 @@ if ($result->num_rows > 0) {
 				echo "$tab$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"$drCustomArea2\"><br>";
 				echo "$tab$tab Custom Area 3 <input type=\"text\" name=\"drCustomArea3\" value=\"$drCustomArea3\"><br>";
 				echo "$tab}<br>";
-				echo "$tab Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dr_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetmask</option>";
+				echo "$tab Copy to:<input type=\"radio\" name=\"itemAction\" value=\"copy\"> Move to:<input type=\"radio\" name=\"itemAction\" value=\"move\"> Delete:<input type=\"radio\" name=\"itemAction\" value=\"delete\"> Save:<input type=\"radio\" name=\"itemAction\" value=\"save\" checked>";
+				echo "<select name=\"dr_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetmask</option>";
 				echo "<option value=\"$globalIdentifier\">$globalText</option>";
 				if ($subnetsExist = "1") {
 					$i = 0;
@@ -386,7 +391,7 @@ if ($result->num_rows > 0) {
 					}
 				}
 				echo "</select><br>";
-				echo "$tab Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
+				echo "$tab <input type=\"submit\" value=\"Submit\"><br>";
 				echo "</form>";
 			}
 		}
@@ -440,7 +445,8 @@ if ($result->num_rows > 0) {
 		echo "$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"$drCustomArea2\"><br>";
 		echo "$tab Custom Area 3 <input type=\"text\" name=\"drCustomArea3\" value=\"$drCustomArea3\"><br>";
 		echo "}<br>";
-		echo "Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dr_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
+		echo "$tab Copy to:<input type=\"radio\" name=\"itemAction\" value=\"copy\"> Move to:<input type=\"radio\" name=\"itemAction\" value=\"move\"> Delete:<input type=\"radio\" name=\"itemAction\" value=\"delete\"> Save:<input type=\"radio\" name=\"itemAction\" value=\"save\" checked>";
+		echo "<select name=\"dr_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
 		if ($subnetsExist = "1") {
 			$i = 0;
 			foreach ($dsIDs as $dsID) {
@@ -449,7 +455,7 @@ if ($result->num_rows > 0) {
 			}
 		}
 		echo "</select><br>";
-		echo "Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
+		echo "<input type=\"submit\" value=\"Submit\"><br>";
 		echo "</form>";
 	}
 } else {
