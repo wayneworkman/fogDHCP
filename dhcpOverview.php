@@ -190,7 +190,7 @@ if ($result->num_rows > 0) {
                 $dgOption = trim(htmlspecialchars($row["dgOption"]));
 		if ($dgOption != "") {
 			echo "<form action=\"$formAction\" method=\"post\">";
-			echo "<input type=\"hidden\" name=\"type\" value=\"$existingGlobalOption\"><input type=\"hidden\" name=\"id\" value=\"$dgID\"><input type=\"text\" name=\"globalOption\" value=\"$dgOption\"> Delete<input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+			echo "<input type=\"hidden\" name=\"type\" value=\"$existingGlobalOption\"><input type=\"hidden\" name=\"id\" value=\"$dgID\"><input type=\"text\" name=\"dgOption\" value=\"$dgOption\"> Delete<input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
 			echo "</form";
 		}
         }
@@ -261,14 +261,14 @@ echo "<br><br>";
 
 // Subnets
 echo "<div>";
-$sql = "SELECT `dsID`,`dsSubnet`,`dsNetMask`,`dsOptionSubnetMask`,`dsRangeDynamicBootpStart`,`dsRangeDynamicBootpEnd`,`dsDefaultLeaseTime`,`dsMaxLeaseTime`,`dsOptionRouters`,`dsOptionDomainNameServers`,`dsOptionNtpServers`,`dsNextServer`,`dsCustomArea1`,`dsCustomArea2`,`dsCustomArea3` FROM dhcpSubnets ORDER BY `dsID` ASC";
+$sql = "SELECT `dsID`,`dsSubnet`,`dsNetmask`,`dsOptionSubnetMask`,`dsRangeDynamicBootpStart`,`dsRangeDynamicBootpEnd`,`dsDefaultLeaseTime`,`dsMaxLeaseTime`,`dsOptionRouters`,`dsOptionDomainNameServers`,`dsOptionNtpServers`,`dsNextServer`,`dsCustomArea1`,`dsCustomArea2`,`dsCustomArea3` FROM dhcpSubnets ORDER BY `dsID` ASC";
 $result = $link->query($sql);
 if ($result->num_rows > 0) {
 	echo "$subnetText(s):";
 	while($row = $result->fetch_assoc()) {
 		$dsID = trim(htmlspecialchars($row["dsID"]));
 		$dsSubnet = trim(htmlspecialchars($row["dsSubnet"]));
-		$dsNetMask = trim(htmlspecialchars($row["dsNetMask"]));
+		$dsNetmask = trim(htmlspecialchars($row["dsNetmask"]));
 		$dsOptionSubnetMask = trim(htmlspecialchars($row["dsOptionSubnetMask"]));
 		$dsRangeDynamicBootpStart = trim(htmlspecialchars($row["dsRangeDynamicBootpStart"]));
 		$dsRangeDynamicBootpEnd = trim(htmlspecialchars($row["dsRangeDynamicBootpEnd"]));
@@ -285,7 +285,7 @@ if ($result->num_rows > 0) {
 		echo "<br>";
 		echo "<input type=\"hidden\" name=\"type\" value=\"$existingSubnet\">";
 		echo "<input type=\"hidden\" name=\"id\" value=\"$dsID\">";
-		echo "<font color=\"$requiredColor\">*</font>$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"$dsSubnet\"> <font color=\"$requiredColor\">*</font>$maskText <input type=\"text\" name=\"dsNetMask\" value=\"$dsNetMask\"> {<br>";
+		echo "<font color=\"$requiredColor\">*</font>$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"$dsSubnet\"> <font color=\"$requiredColor\">*</font>$maskText <input type=\"text\" name=\"dsNetmask\" value=\"$dsNetmask\"> {<br>";
 		echo "$tab<font color=\"$requiredColor\">*</font>range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"$dsRangeDynamicBootpStart\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"$dsRangeDynamicBootpEnd\">;<br>";
 		echo "$tab option subnet-mask <input type=\"text\" name=\"dsOptionSubnetMask\" value=\"$dsOptionSubnetMask\">;<br>";
 		echo "$tab default-lease-time <input type=\"text\" name=\"dsDefaultLeaseTime\" value=\"$dsDefaultLeaseTime\">;<br>";
@@ -307,7 +307,7 @@ if ($result->num_rows > 0) {
 		$result2 = $link->query($sql);
 		if ($result2->num_rows > 0) {
 			echo "<br>";
-			echo "$tab Classes inside of $subnetText $dsSubnet $maskText $dsNetMask:";
+			echo "$tab Classes inside of $subnetText $dsSubnet $maskText $dsNetmask:";
 			while($row2 = $result2->fetch_assoc()) {
 				$dcID = trim(htmlspecialchars($row2["dcID"]));
 				$dcClass = trim(htmlspecialchars($row2["dcClass"]));
@@ -325,7 +325,7 @@ if ($result->num_rows > 0) {
 				echo "$tab$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"$dcMatchOption2\"><br>";
 				echo "$tab$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"$dcMatchOption3\"><br>";
 				echo "$tab }<br>";
-				echo "$tab Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dc_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetMask</option>";
+				echo "$tab Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dc_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetmask</option>";
 				echo "<option value=\"$globalIdentifier\">$globalText</option>";
 				if ($subnetsExist = "1") {
 					$i = 0;
@@ -350,7 +350,7 @@ if ($result->num_rows > 0) {
 		$result3 = $link->query($sql);
 		if ($result3->num_rows > 0) {
 			echo "<br>";
-			echo "$tab Reservations inside of $subnetText $dsSubnet $maskText $dsNetMask:<br>";
+			echo "$tab Reservations inside of $subnetText $dsSubnet $maskText $dsNetmask:<br>";
 			while($row3 = $result3->fetch_assoc()) {
 				$drID = trim(htmlspecialchars($row3["drID"]));
 				$drMAC = trim(htmlspecialchars($row3["drMAC"]));
@@ -374,7 +374,7 @@ if ($result->num_rows > 0) {
 				echo "$tab$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"$drCustomArea2\"><br>";
 				echo "$tab$tab Custom Area 3 <input type=\"text\" name=\"drCustomArea3\" value=\"$drCustomArea3\"><br>";
 				echo "$tab}<br>";
-				echo "$tab Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dr_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetMask</option>";
+				echo "$tab Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dr_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetmask</option>";
 				echo "<option value=\"$globalIdentifier\">$globalText</option>";
 				if ($subnetsExist = "1") {
 					$i = 0;
@@ -469,7 +469,7 @@ echo "<br><br>";
 echo "<div>";
 echo "<form action=\"$formAction\" method=\"post\">";
 echo "New $globalText option:<br><br>";
-echo "<input type=\"hidden\" name=\"type\" value=\"$newGlobalOption\"><input type=\"text\" name=\"globalOption\" value=\"\">  <input type=\"submit\" value=\"Submit\"><br>";
+echo "<input type=\"hidden\" name=\"type\" value=\"$newGlobalOption\"><input type=\"text\" name=\"dgOption\" value=\"\">  <input type=\"submit\" value=\"Submit\"><br>";
 echo "</form>";
 echo "</div>";
 
@@ -517,7 +517,7 @@ echo "<div>";
 echo "<form action=\"$formAction\" method=\"post\">";
 echo "New $subnetText:<br><br>";
 echo "<input type=\"hidden\" name=\"type\" value=\"$newSubnet\">";
-echo "<font color=\"$requiredColor\">*</font>$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"\"> <font color=\"$requiredColor\">*</font>$maskText <input type=\"text\" name=\"dsNetMask\" value=\"\"> {<br>";
+echo "<font color=\"$requiredColor\">*</font>$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"\"> <font color=\"$requiredColor\">*</font>$maskText <input type=\"text\" name=\"dsNetmask\" value=\"\"> {<br>";
 echo "$tab<font color=\"$requiredColor\">*</font>range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"\">;<br>";
 echo "$tab option subnet-mask <input type=\"text\" name=\"dsOptionSubnetMask\" value=\"\">;<br>";
 echo "$tab default-lease-time <input type=\"text\" name=\"dsDefaultLeaseTime\" value=\"\">;<br>";

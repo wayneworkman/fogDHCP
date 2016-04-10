@@ -36,12 +36,12 @@ $sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey`='DHCP_SER
 switch ($type) {
 	case $existingGlobalOption:
 		$dgID = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['id'])));
-		$globalOption = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['globalOption'])));
-		$sql = "UPDATE dhcpGlobals SET `dgOption`='$globalOption' WHERE `dgID`='$dgID'";
+		$dgOption = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dgOption'])));
+		$sql = "UPDATE dhcpGlobals SET `dgOption`='$dgOption' WHERE `dgID`='$dgID'";
 		break;
 	case $newGlobalOption:
-		$globalOption = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['globalOption'])));
-		$sql = "INSERT INTO dhcpGlobals (`dgOption`) VALUES ('$globalOption')";
+		$dgOption = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dgOption'])));
+		$sql = "INSERT INTO dhcpGlobals (`dgOption`) VALUES ('$dgOption')";
 		break;
 	case $existingClass:
 		$dcID = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['id'])));
@@ -65,7 +65,7 @@ switch ($type) {
 	case $existingSubnet:
 		$dsID = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['id'])));
 		$dsSubnet = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsSubnet'])));
-		$dsNetMask = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsNetMask'])));
+		$dsNetmask = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsNetmask'])));
 		$dsRangeDynamicBootpStart = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsRangeDynamicBootpStart'])));
 		$dsRangeDynamicBootpEnd = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsRangeDynamicBootpEnd'])));
 		$dsOptionSubnetMask = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsOptionSubnetMask'])));
@@ -78,11 +78,11 @@ switch ($type) {
 		$dsCustomArea1 = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsCustomArea1'])));
 		$dsCustomArea2 = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsCustomArea2'])));
 		$dsCustomArea3 = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsCustomArea3'])));
-		$sql = "UPDATE dhcpSubnets SET `dsSubnet`='$dsSubnet',`dsNetmask`='$dsNetMask',`dsOptionSubnetMask`='$dsOptionSubnetMask',`dsRangeDynamicBootpStart`='$dsRangeDynamicBootpStart',`dsRangeDynamicBootpEnd`='$dsRangeDynamicBootpEnd',`dsDefaultLeaseTime`='$dsDefaultLeaseTime',`dsMaxLeaseTime`='$dsMaxLeaseTime',`dsOptionRouters`='$dsOptionRouters',`dsOptionDomainNameServers`='$dsOptionDomainNameServers',`dsOptionNtpServers`='$dsOptionNtpServers',`dsNextServer`='$dsNextServer',`dsCustomArea1`='$dsCustomArea1',`dsCustomArea2`='$dsCustomArea2',`dsCustomArea3`='$dsCustomArea3' WHERE `dsID`='$dsID'";
+		$sql = "UPDATE dhcpSubnets SET `dsSubnet`='$dsSubnet',`dsNetmask`='$dsNetmask',`dsOptionSubnetMask`='$dsOptionSubnetMask',`dsRangeDynamicBootpStart`='$dsRangeDynamicBootpStart',`dsRangeDynamicBootpEnd`='$dsRangeDynamicBootpEnd',`dsDefaultLeaseTime`='$dsDefaultLeaseTime',`dsMaxLeaseTime`='$dsMaxLeaseTime',`dsOptionRouters`='$dsOptionRouters',`dsOptionDomainNameServers`='$dsOptionDomainNameServers',`dsOptionNtpServers`='$dsOptionNtpServers',`dsNextServer`='$dsNextServer',`dsCustomArea1`='$dsCustomArea1',`dsCustomArea2`='$dsCustomArea2',`dsCustomArea3`='$dsCustomArea3' WHERE `dsID`='$dsID'";
 		break;
 	case $newSubnet:
 		$dsSubnet = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsSubnet'])));
-		$dsNetMask = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsNetMask'])));
+		$dsNetmask = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsNetmask'])));
 		$dsRangeDynamicBootpStart = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsRangeDynamicBootpStart'])));
 		$dsRangeDynamicBootpEnd = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsRangeDynamicBootpEnd'])));
 		$dsOptionSubnetMask = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsOptionSubnetMask'])));
@@ -95,7 +95,7 @@ switch ($type) {
 		$dsCustomArea1 = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsCustomArea1'])));
 		$dsCustomArea2 = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsCustomArea2'])));
 		$dsCustomArea3 = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['dsCustomArea3'])));
-		$sql = "INSERT INTO dhcpSubnets (`dsSubnet`,`dsNetmask`,`dsOptionSubnetMask`,`dsRangeDynamicBootpStart`,`dsRangeDynamicBootpEnd`,`dsDefaultLeaseTime`,`dsMaxLeaseTime`,`dsOptionRouters`,`dsOptionDomainNameServers`,`dsOptionNtpServers`,`dsNextServer`,`dsCustomArea1`,`dsCustomArea2`,`dsCustomArea3`) VALUES ('$dsSubnet','$dsNetMask','$dsOptionSubnetMask','$dsRangeDynamicBootpStart','$dsRangeDynamicBootpEnd','$dsDefaultLeaseTime','$dsMaxLeaseTime','$dsOptionRouters','$dsOptionDomainNameServers','$dsOptionNtpServers','$dsNextServer','$dsCustomArea1','$dsCustomArea2','$dsCustomArea3')";
+		$sql = "INSERT INTO dhcpSubnets (`dsSubnet`,`dsNetmask`,`dsOptionSubnetMask`,`dsRangeDynamicBootpStart`,`dsRangeDynamicBootpEnd`,`dsDefaultLeaseTime`,`dsMaxLeaseTime`,`dsOptionRouters`,`dsOptionDomainNameServers`,`dsOptionNtpServers`,`dsNextServer`,`dsCustomArea1`,`dsCustomArea2`,`dsCustomArea3`) VALUES ('$dsSubnet','$dsNetmask','$dsOptionSubnetMask','$dsRangeDynamicBootpStart','$dsRangeDynamicBootpEnd','$dsDefaultLeaseTime','$dsMaxLeaseTime','$dsOptionRouters','$dsOptionDomainNameServers','$dsOptionNtpServers','$dsNextServer','$dsCustomArea1','$dsCustomArea2','$dsCustomArea3')";
 		break;
 	case $existingReservation:
 		$drName = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['drName'])));
