@@ -120,7 +120,7 @@ $result = $link->query($sql);
 if ($result->num_rows > 0) {
         $filenamesExist = "1";
         while($row = $result->fetch_assoc()) {
-                $DHCP_SERVICE_ENABLED = trim(htmlspecialchars($row["dfFileName"]));
+                $DHCP_SERVICE_ENABLED = trim(htmlspecialchars($row["settingValue"]));
         }
 } else {
         $DHCP_SERVICE_ENABLED = "0";
@@ -152,6 +152,10 @@ if ($DHCP_HAS_BAD_CONFIG == $True) {
         echo "<font color=\"yellow\"><b>NOT AVAILABLE!</b></font><br>";
 } else {
         echo "<font color=\"red\"><b>NOT IDENTIFIED!</b></font><br>";
+}
+$itemActionMessage = $link->real_escape_string(htmlspecialchars_decode(trim($_REQUEST['itemActionMessage'])));
+if ($itemActionMessage != "") {
+	echo "$itemActionMessage<br>";
 }
 echo "</div>";
 
@@ -399,7 +403,7 @@ if ($result->num_rows > 0) {
 		echo "}<br>";		
 	}
 } else {
-	echo "There are no $subnetText defined.<br>";
+	echo "There are no $subnetText(s) defined.<br>";
 }
 $result->free();
 echo "</div>";
