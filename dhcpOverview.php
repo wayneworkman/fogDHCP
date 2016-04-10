@@ -17,6 +17,8 @@ echo "<html lang=\"en\">";
 echo "<body>";
 //---------------End Temporary code-------------------
 
+
+
 $formAction = "dhcpPost.php";
 $globalIdentifier = "2000000";
 $globalText = "global";
@@ -31,6 +33,31 @@ $existingSubnet = "4";
 $newSubnet = "5";
 $existingReservation = "6";
 $newReservation = "7";
+
+
+
+
+
+
+// Get list of subnets for use with other bodies.
+$dsSubnets = array();
+$dsNetmasks = array();
+$dsIDs = array();
+$sql = "SELECT `dsSubnet`,`dsNetmask`,`dsID` FROM dhcpSubnets ORDER BY `dsID` ASC";
+$result = $link->query($sql);
+if ($result->num_rows > 0) {
+        $subnetsExist = "1";
+        while($row = $result->fetch_assoc()) {
+                $dsSubnets[] = trim(htmlspecialchars($row["dsSubnet"]));
+                $dsNetmasks[] = trim(htmlspecialchars($row["dsNetmask"]));
+                $dsIDs[] = trim(htmlspecialchars($row["dsID"]));
+        }
+} else {
+        $subnetsExist = "0";
+}
+
+
+
 
 
 // DHCP Global Options.
@@ -63,25 +90,6 @@ echo "<br><br>";
 
 
 
-
-// Get list of subnets for use with other bodies.
-$dsSubnets = array();
-$dsNetmasks = array();
-$dsIDs = array();
-$sql = "SELECT `dsSubnet`,`dsNetmask`,`dsID` FROM dhcpSubnets ORDER BY `dsID` ASC";
-$result = $link->query($sql);
-if ($result->num_rows > 0) {
-	$subnetsExist = "1";
-	while($row = $result->fetch_assoc()) {
-		$dsSubnets[] = trim(htmlspecialchars($row["dsSubnet"]));
-		$dsNetmasks[] = trim(htmlspecialchars($row["dsNetmask"]));
-		$dsIDs[] = trim(htmlspecialchars($row["dsID"]));
-	}
-} else {
-	$subnetsExist = "0";
-}
-
-
 // DHCP Global Classes
 echo "<div>";
 $sql = "SELECT `dcID`,`dcClass`,`dcMatch`,`dcMatchOption1`,`dcMatchOption2`,`dcMatchOption3` FROM `dhcpClasses` WHERE dc_dsID = $globalIdentifier ORDER BY `dcID` ASC";
@@ -105,7 +113,7 @@ if ($result->num_rows > 0) {
 		echo "$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"$dcMatchOption2\"><br>";
 		echo "$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"$dcMatchOption3\"><br>";
 		echo "}<br>";
-		echo "$globalText or $subnetText: <select name=\"dc_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
+		echo "Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dc_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
 		if ($subnetsExist = "1") {
 			$i = 0;
 			foreach ($dsIDs as $dsID) {
@@ -114,7 +122,7 @@ if ($result->num_rows > 0) {
 			}
 		}
 		echo "</select><br>";
-		echo "Delete <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+		echo "Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
 		echo "</form>";
 	}
 } else {
@@ -198,7 +206,7 @@ if ($result->num_rows > 0) {
 				echo "$tab$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"$dcMatchOption2\"><br>";
 				echo "$tab$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"$dcMatchOption3\"><br>";
 				echo "$tab }<br>";
-				echo "$tab $globalText or $subnetText: <select name=\"dc_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetMask</option>";
+				echo "$tab Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dc_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetMask</option>";
 				echo "<option value=\"$globalIdentifier\">$globalText</option>";
 				if ($subnetsExist = "1") {
 					$i = 0;
@@ -210,7 +218,7 @@ if ($result->num_rows > 0) {
 					}
 				}
 				echo "</select><br>";
-				echo "$tab Delete <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+				echo "Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
 				echo "</form>";
 			}
 		}
@@ -220,20 +228,20 @@ if ($result->num_rows > 0) {
 
 		//Get reservations for this subnet.
 		$sql = "SELECT `drID`,`drMAC`,`drName`,`drFilename`,`drIP`,`drOptionDomainNameServers`,`drCustomArea1`,`drCustomArea2`,`drCustomArea3` FROM dhcpReservations WHERE `dr_dsID` = $dsID ORDER BY `drID` ASC";
-		$result = $link->query($sql);
-		if ($result->num_rows > 0) {
+		$result3 = $link->query($sql);
+		if ($result3->num_rows > 0) {
 			echo "<br>";
 			echo "$tab Reservations inside of $subnetText $dsSubnet $maskText $dsNetMask:<br>";
-			while($row = $result->fetch_assoc()) {
-				$drID = trim(htmlspecialchars($row["drID"]));
-				$drMAC = trim(htmlspecialchars($row["drMAC"]));
-				$drName = trim(htmlspecialchars($row["drName"]));
-				$drFilename = trim(htmlspecialchars($row["drFilename"]));
-				$drIP = trim(htmlspecialchars($row["drIP"]));
-				$drOptionDomainNameServers = trim(htmlspecialchars($row["drOptionDomainNameServers"]));
-				$drCustomArea1 = trim(htmlspecialchars($row["drCustomArea1"]));
-				$drCustomArea2 = trim(htmlspecialchars($row["drCustomArea2"]));
-				$drCustomArea3 = trim(htmlspecialchars($row["drCustomArea3"]));
+			while($row3 = $result3->fetch_assoc()) {
+				$drID = trim(htmlspecialchars($row3["drID"]));
+				$drMAC = trim(htmlspecialchars($row3["drMAC"]));
+				$drName = trim(htmlspecialchars($row3["drName"]));
+				$drFilename = trim(htmlspecialchars($row3["drFilename"]));
+				$drIP = trim(htmlspecialchars($row3["drIP"]));
+				$drOptionDomainNameServers = trim(htmlspecialchars($row3["drOptionDomainNameServers"]));
+				$drCustomArea1 = trim(htmlspecialchars($row3["drCustomArea1"]));
+				$drCustomArea2 = trim(htmlspecialchars($row3["drCustomArea2"]));
+				$drCustomArea3 = trim(htmlspecialchars($row3["drCustomArea3"]));
 				echo "<form action=\"$formAction\" method=\"post\">";
 				echo "<br>";
 				echo "<input type=\"hidden\" name=\"type\" value=\"$existingReservation\">";
@@ -247,7 +255,7 @@ if ($result->num_rows > 0) {
 				echo "$tab$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"$drCustomArea2\"><br>";
 				echo "$tab$tab Custom Area 3 <input type=\"text\" name=\"drCustomArea3\" value=\"$drCustomArea3\"><br>";
 				echo "$tab}<br>";
-				echo "$tab $globalText or $subnetText: <select name=\"dr_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetMask</option>";
+				echo "$tab Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dr_dsID\"><option value=\"$dsID\">$subnetText $dsSubnet $maskText $dsNetMask</option>";
 				echo "<option value=\"$globalIdentifier\">$globalText</option>";
 				if ($subnetsExist = "1") {
 					$i = 0;
@@ -259,10 +267,11 @@ if ($result->num_rows > 0) {
 					}
 				}
 				echo "</select><br>";
-				echo "$tab Delete <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+				echo "Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
 				echo "</form>";
 			}
 		}
+		$result3->free();
 		echo "}<br>";		
 	}
 } else {
@@ -312,7 +321,7 @@ if ($result->num_rows > 0) {
 		echo "$tab Custom Area 2 <input type=\"text\" name=\"drCustomArea2\" value=\"$drCustomArea2\"><br>";
 		echo "$tab Custom Area 3 <input type=\"text\" name=\"drCustomArea3\" value=\"$drCustomArea3\"><br>";
 		echo "}<br>";
-		echo "$globalText or $subnetText: <select name=\"dr_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
+		echo "Copy to: <input type=\"radio\" name=\"copyOrMove\" value=\"copy\"> Move to: <input type=\"radio\" name=\"copyOrMove\" value=\"move\"> <select name=\"dr_dsID\"><option value=\"$globalIdentifier\">$globalText</option>";
 		if ($subnetsExist = "1") {
 			$i = 0;
 			foreach ($dsIDs as $dsID) {
@@ -321,7 +330,7 @@ if ($result->num_rows > 0) {
 			}
 		}
 		echo "</select><br>";
-		echo "Delete <input type=\"checkbox\" name=\"delete\" value=\"delete\"> <input type=\"submit\" value=\"Submit\"><br>";
+		echo "Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
 		echo "</form>";
 	}
 } else {
