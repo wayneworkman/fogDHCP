@@ -809,14 +809,32 @@ while(1) {
 								}
 							}
 						} else {
-							WriteLog("The DHCP service has failed, and for some reason, there is no \"$DHCP_TO_USE.old\" to try to restore. You need to immediately investigate the cause of the failure and find a solution. It could be something as simple as a typo in your configuration, or someone has removed the backup dhcp file, or something else as well.");
+							WriteLog("The DHCP service has failed, and for some reason, there is no \"$DHCP_TO_USE.good\" to try to restore. You need to immediately investigate the cause of the failure and find a solution. It could be something as simple as a typo in your configuration, or someone has removed the backup dhcp file, or something else as well.");
 						}
+					$sql = "UPDATE `globalSettings` SET settingValue = '$True' WHERE `settingKey` = 'DHCP_HAS_BAD_CONFIG'";
+					if ($link->query($sql)) {
+						// Status updated.
+						if ($ONLY_LOG_CHANGES == "0") {
+							WriteLog("The DHCP_HAS_BAD_CONFIG status was successfully updated with the value \"$True\".");
+						}
+					} else {
+						WriteLog("Could not upate the DHCP_HAS_BAD_CONFIG value in the globalSettings table, attempted to set the value to \"$True\".");
+					}
 					} else {
 						WriteLog("Making a copy of the current DHCP configuration to \"$DHCP_TO_USE.good\" as a point to revert to if a future configuration fails." );
 						if (file_exists("$DHCP_TO_USE.good")) {
 							unlink("$DHCP_TO_USE.good");
 						}
 						copy($DHCP_TO_USE, "$DHCP_TO_USE.good");
+						$sql = "UPDATE `globalSettings` SET settingValue = '$False' WHERE `settingKey` = 'DHCP_HAS_BAD_CONFIG'";
+						if ($link->query($sql)) {
+							// Status updated.
+							if ($ONLY_LOG_CHANGES == "0") {
+								WriteLog("The DHCP_HAS_BAD_CONFIG status was successfully updated with the value \"$False\".");
+							}
+						} else {
+							WriteLog("Could not upate the DHCP_HAS_BAD_CONFIG value in the globalSettings table, attempted to set the value to \"$False\".");
+						}
 					}
 				}
 			} else {

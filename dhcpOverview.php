@@ -80,7 +80,7 @@ $result->free();
 
 
 
-// Get DHCP status.
+// Get DHCP service status.
 $sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey`='DHCP_FAILED' LIMIT 1";
 $result = $link->query($sql);
 if ($result->num_rows > 0) {
@@ -89,6 +89,23 @@ if ($result->num_rows > 0) {
 	}
 } else {
 	$DHCP_FAILED = $NotAvailable;
+}
+$result->free();
+
+
+
+
+
+
+// Get DHCP configuration status.
+$sql = "SELECT `settingValue` FROM `globalSettings` WHERE `settingKey`='DHCP_HAS_BAD_CONFIG' LIMIT 1";
+$result = $link->query($sql);
+if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+                $DHCP_HAS_BAD_CONFIG = trim(htmlspecialchars($row["settingValue"]));
+        }
+} else {
+        $DHCP_HAS_BAD_CONFIG = $NotAvailable;
 }
 $result->free();
 
@@ -114,9 +131,9 @@ $result->free();
 
 
 
-//Display DHCP status and enabled/disabled radio button.
+//Display DHCP service status and configuration status.
 echo "<div>";
-echo "DHCP status is ";
+echo "DHCP service status is ";
 if ($DHCP_FAILED == $True) {
 	echo "<font color=\"red\"><b>FAILED!</b></font><br>";
 } else if ($DHCP_FAILED == $False) {
@@ -126,13 +143,27 @@ if ($DHCP_FAILED == $True) {
 } else {
 	echo "<font color=\"red\"><b>NOT IDENTIFIED!</b></font><br>";
 }
+echo "DHCP configuration status is ";
+if ($DHCP_HAS_BAD_CONFIG == $True) {
+        echo "<font color=\"red\"><b>BAD!</b></font><br>";
+} else if ($DHCP_HAS_BAD_CONFIG == $False) {
+        echo "<font color=\"green\"><b>GOOD!</b></font><br>";
+} else if ($DHCP_HAS_BAD_CONFIG == $NotAvailable) {
+        echo "<font color=\"yellow\"><b>NOT AVAILABLE!</b></font><br>";
+} else {
+        echo "<font color=\"red\"><b>NOT IDENTIFIED!</b></font><br>";
+}
 echo "</div>";
+
+
 
 
 
 echo "<br><br>";
 
 
+
+//Display radio buttons for enabling/disabling service.
 echo "<div>";
 echo "<form action=\"$formAction\" method=\"post\">";
 echo "Enable or Disable DHCP manager service:<br>";

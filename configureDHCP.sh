@@ -36,10 +36,13 @@ mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_SERVICE_
 mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_METHOD'"
 mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'ONLY_LOG_CHANGES'"
 mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_SERVICE_ENABLED'"
+mysql -s -D fog -e "DELETE FROM globalSettings WHERE settingKey = 'DHCP_HAS_BAD_CONFIG'"
 #-----End Temporary Lines-----#
 
             mysql < /var/www/html/fogDHCP/setupDB.sql
             dhcpDataExists=$(mysql -s -D fog -e "SELECT COUNT(*) FROM globalSettings where settingKey = 'DHCP_Service_Sleep_Time' ")
+
+            [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_HAS_BAD_CONFIG','This setting is set by the DHCP manager service, and shows if the saved config is good or not. DHCP could be functioning on a known-good config and be working while a bad config is stored.','0','DHCP');"
 
             [[ $dhcpDataExists == 0 ]] && mysql -s -D fog -e "INSERT INTO globalSettings (settingKey,settingDesc,settingValue,settingCategory) VALUES ('DHCP_SERVICE_ENABLED','This setting controls if the DHCP manager service should attempt to do anything or not. 1 means yes, 0 means no.','1','DHCP');"
 
