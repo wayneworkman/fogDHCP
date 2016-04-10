@@ -19,7 +19,7 @@ echo "<body>";
 
 
 
-$formAction = "dhcpPost.php";
+$formAction = "FOGDHCPPost.php";
 $globalIdentifier = "2000000";
 $globalText = "global";
 $subnetText = "subnet";

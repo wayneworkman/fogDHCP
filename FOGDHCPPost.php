@@ -15,7 +15,7 @@ if ($link->connect_error) {
 //---------------End Temporary code-------------------
 
 
-$NextURL = "dhcpOverview.php";
+$NextURL = "FOGDHCPOverview.php";
 $existingGlobalOption = "0";
 $newGlobalOption = "1";
 $existingClass = "2";
