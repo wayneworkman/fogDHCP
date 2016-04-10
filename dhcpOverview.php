@@ -24,7 +24,8 @@ $globalIdentifier = "2000000";
 $globalText = "global";
 $subnetText = "subnet";
 $maskText = "netmask";
-$tab = "&emsp;"; //Note every $tab used in code is followed by a space.
+$requiredColor = "red";
+$tab = "&emsp;&emsp;"; //Note every $tab used in code is followed by a space.
 $existingGlobalOption = "0";
 $newGlobalOption = "1";
 $existingClass = "2";
@@ -107,9 +108,9 @@ if ($result->num_rows > 0) {
 		echo "<br>";
 		echo "<input type=\"hidden\" name=\"type\" value=\"$existingClass\">";
 		echo "<input type=\"hidden\" name=\"id\" value=\"$dcID\">";
-		echo "class \"<input type=\"text\" name=\"dcClass\" value=\"$dcClass\">\" {<br>";
-		echo "$tab Match: <input type=\"text\" name=\"dcMatch\" value=\"$dcMatch\"><br>";
-		echo "$tab Match Option 1: <input type=\"text\" name=\"dcMatchOption1\" value=\"$dcMatchOption1\"><br>";
+		echo "<font color=\"$requiredColor\">*</font>class \"<input type=\"text\" name=\"dcClass\" value=\"$dcClass\">\" {<br>";
+		echo "$tab<font color=\"$requiredColor\">*</font>Match: <input type=\"text\" name=\"dcMatch\" value=\"$dcMatch\"><br>";
+		echo "$tab<font color=\"$requiredColor\">*</font>Match Option 1: <input type=\"text\" name=\"dcMatchOption1\" value=\"$dcMatchOption1\"><br>";
 		echo "$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"$dcMatchOption2\"><br>";
 		echo "$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"$dcMatchOption3\"><br>";
 		echo "}<br>";
@@ -166,7 +167,7 @@ if ($result->num_rows > 0) {
 		echo "<br>";
 		echo "<input type=\"hidden\" name=\"type\" value=\"$existingSubnet\">";
 		echo "<input type=\"hidden\" name=\"id\" value=\"$dsID\">";
-		echo "$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"$dsSubnet\"> $maskText <input type=\"text\" name=\"dsNetMask\" value=\"$dsNetMask\"> {<br>";
+		echo "<font color=\"$requiredColor\">*</font>$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"$dsSubnet\"> <font color=\"$requiredColor\">*</font>$maskText <input type=\"text\" name=\"dsNetMask\" value=\"$dsNetMask\"> {<br>";
 		echo "$tab option subnet-mask <input type=\"text\" name=\"dsNetMask\" value=\"$dsNetMask\">;<br>";
 		echo "$tab range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"$dsRangeDynamicBootpStart\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"$dsRangeDynamicBootpEnd\">;<br>";
 		echo "$tab default-lease-time <input type=\"text\" name=\"dsDefaultLeaseTime\" value=\"$dsDefaultLeaseTime\">;<br>";
@@ -188,7 +189,7 @@ if ($result->num_rows > 0) {
 		$result2 = $link->query($sql);
 		if ($result2->num_rows > 0) {
 			echo "<br>";
-			echo "$tab Classes inside of $subnetText $dsSubnet $maskText $dsNetMask:<br>";
+			echo "$tab Classes inside of $subnetText $dsSubnet $maskText $dsNetMask:";
 			while($row2 = $result2->fetch_assoc()) {
 				$dcID = trim(htmlspecialchars($row2["dcID"]));
 				$dcClass = trim(htmlspecialchars($row2["dcClass"]));
@@ -200,9 +201,9 @@ if ($result->num_rows > 0) {
 				echo "<br>";
 				echo "<input type=\"hidden\" name=\"type\" value=\"$existingClass\">";
 				echo "<input type=\"hidden\" name=\"id\" value=\"$dcID\">";
-				echo "$tab class \"<input type=\"text\" name=\"dcClass\" value=\"$dcClass\">\" {<br>";
-				echo "$tab$tab Match: <input type=\"text\" name=\"dcMatch\" value=\"$dcMatch\"><br>";
-				echo "$tab$tab Match Option 1: <input type=\"text\" name=\"dcMatchOption1\" value=\"$dcMatchOption1\"><br>";
+				echo "$tab<font color=\"$requiredColor\">*</font>class \"<input type=\"text\" name=\"dcClass\" value=\"$dcClass\">\" {<br>";
+				echo "$tab$tab<font color=\"$requiredColor\">*</font>Match: <input type=\"text\" name=\"dcMatch\" value=\"$dcMatch\"><br>";
+				echo "$tab$tab<font color=\"$requiredColor\">*</font>Match Option 1: <input type=\"text\" name=\"dcMatchOption1\" value=\"$dcMatchOption1\"><br>";
 				echo "$tab$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"$dcMatchOption2\"><br>";
 				echo "$tab$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"$dcMatchOption3\"><br>";
 				echo "$tab }<br>";
@@ -218,7 +219,7 @@ if ($result->num_rows > 0) {
 					}
 				}
 				echo "</select><br>";
-				echo "Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
+				echo "$tab Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
 				echo "</form>";
 			}
 		}
@@ -246,8 +247,8 @@ if ($result->num_rows > 0) {
 				echo "<br>";
 				echo "<input type=\"hidden\" name=\"type\" value=\"$existingReservation\">";
 				echo "<input type=\"hidden\" name=\"id\" value=\"$drID\">";
-				echo "$tab host <input type=\"text\" name=\"drName\" value=\"$drName\"> {<br>";
-				echo "$tab$tab hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"$drMAC\">;<br>";
+				echo "$tab<font color=\"$requiredColor\">*</font>host <input type=\"text\" name=\"drName\" value=\"$drName\"> {<br>";
+				echo "$tab$tab<font color=\"$requiredColor\">*</font>hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"$drMAC\">;<br>";
 				echo "$tab$tab fixed-address <input type=\"text\" name=\"drIP\" value=\"$drIP\">;<br>";
 				echo "$tab$tab filename \"<input type=\"text\" name=\"drFilename\" value=\"$drFilename\">\";<br>";
 				echo "$tab$tab option domain-name-servers <input type=\"text\" name=\"drOptionDomainNameServers\" value=\"$drOptionDomainNameServers\">;<br>";
@@ -267,7 +268,7 @@ if ($result->num_rows > 0) {
 					}
 				}
 				echo "</select><br>";
-				echo "Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
+				echo "$tab Delete: <input type=\"checkbox\" name=\"delete\" value=\"delete\"><input type=\"submit\" value=\"Submit\"><br>";
 				echo "</form>";
 			}
 		}
@@ -312,8 +313,8 @@ if ($result->num_rows > 0) {
 		echo "<br>";
 		echo "<input type=\"hidden\" name=\"type\" value=\"$existingReservation\">";
 		echo "<input type=\"hidden\" name=\"id\" value=\"$drID\">";
-		echo "host <input type=\"text\" name=\"drName\" value=\"$drName\"> {<br>";
-		echo "$tab hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"$drMAC\">;<br>";
+		echo "<font color=\"$requiredColor\">*</font>host <input type=\"text\" name=\"drName\" value=\"$drName\"> {<br>";
+		echo "$tab<font color=\"$requiredColor\">*</font>hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"$drMAC\">;<br>";
 		echo "$tab fixed-address <input type=\"text\" name=\"drIP\" value=\"$drIP\">;<br>";
 		echo "$tab filename \"<input type=\"text\" name=\"drFilename\" value=\"$drFilename\">\";<br>";
 		echo "$tab option domain-name-servers <input type=\"text\" name=\"drOptionDomainNameServers\" value=\"$drOptionDomainNameServers\">;<br>";
@@ -349,7 +350,7 @@ echo "<br><br>";
 
 echo "<div>";
 echo "<form action=\"$formAction\" method=\"post\">";
-echo "New $globalText option:<br>";
+echo "New $globalText option:<br><br>";
 echo "<input type=\"hidden\" name=\"type\" value=\"$newGlobalOption\"><input type=\"text\" name=\"globalOption\" value=\"\">  <input type=\"submit\" value=\"Submit\"><br>";
 echo "</form>";
 echo "</div>";
@@ -364,11 +365,11 @@ echo "<br><br>";
 // New class
 echo "<div>";
 echo "<form action=\"$formAction\" method=\"post\">";
-echo "New Class:<br>";
+echo "New Class:<br><br>";
 echo "<input type=\"hidden\" name=\"type\" value=\"$newClass\">";
-echo "class \"<input type=\"text\" name=\"dcClass\" value=\"\">\" {<br>";
-echo "$tab Match: <input type=\"text\" name=\"dcMatch\" value=\"\"><br>";
-echo "$tab Match Option 1: <input type=\"text\" name=\"dcMatchOption1\" value=\"\"><br>";
+echo "<font color=\"$requiredColor\">*</font>class \"<input type=\"text\" name=\"dcClass\" value=\"\">\" {<br>";
+echo "$tab<font color=\"$requiredColor\">*</font>Match: <input type=\"text\" name=\"dcMatch\" value=\"\"><br>";
+echo "$tab<font color=\"$requiredColor\">*</font>Match Option 1: <input type=\"text\" name=\"dcMatchOption1\" value=\"\"><br>";
 echo "$tab Match Option 2: <input type=\"text\" name=\"dcMatchOption2\" value=\"\"><br>";
 echo "$tab Match Option 3: <input type=\"text\" name=\"dcMatchOption3\" value=\"\"><br>";
 echo "}<br>";
@@ -395,11 +396,10 @@ echo "<br><br>";
 
 // New subnet
 echo "<div>";
-echo "New $subnetText:";
 echo "<form action=\"$formAction\" method=\"post\">";
-echo "<br>";
+echo "New $subnetText:<br><br>";
 echo "<input type=\"hidden\" name=\"type\" value=\"$newSubnet\">";
-echo "$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"\"> $maskText <input type=\"text\" name=\"dsNetMask\" value=\"\"> {<br>";
+echo "<font color=\"$requiredColor\">*</font>$subnetText <input type=\"text\" name=\"dsSubnet\" value=\"\"> <font color=\"$requiredColor\">*</font>$maskText <input type=\"text\" name=\"dsNetMask\" value=\"\"> {<br>";
 echo "$tab option subnet-mask <input type=\"text\" name=\"dsNetMask\" value=\"\">;<br>";
 echo "$tab range dynamic-bootp <input type=\"text\" name=\"dsRangeDynamicBootpStart\" value=\"\"> <input type=\"text\" name=\"dsRangeDynamicBootpEnd\" value=\"\">;<br>";
 echo "$tab default-lease-time <input type=\"text\" name=\"dsDefaultLeaseTime\" value=\"\">;<br>";
@@ -427,12 +427,11 @@ echo "<br><br>";
 
 // New DHCP Reservation
 echo "<div>";
-echo "New reservation:";
 echo "<form action=\"$formAction\" method=\"post\">";
-echo "<br>";
+echo "New reservation:<br><br>";
 echo "<input type=\"hidden\" name=\"type\" value=\"$newReservation\">";
-echo "host <input type=\"text\" name=\"drName\" value=\"\"> {<br>";
-echo "$tab hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"\">;<br>";
+echo "<font color=\"$requiredColor\">*</font>host <input type=\"text\" name=\"drName\" value=\"\"> {<br>";
+echo "$tab<font color=\"$requiredColor\">*</font>hardware ethernet <input type=\"text\" name=\"drMAC\" value=\"\">;<br>";
 echo "$tab fixed-address <input type=\"text\" name=\"drIP\" value=\"\">;<br>";
 echo "$tab filename \"<input type=\"text\" name=\"drFilename\" value=\"\">\";<br>";
 echo "$tab option domain-name-servers <input type=\"text\" name=\"drOptionDomainNameServers\" value=\"\">;<br>";
@@ -454,6 +453,8 @@ echo "</form>";
 echo "</div>";
 
 
+
+echo "<br><br>";
 
 
 
